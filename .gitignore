@@ -1,0 +1,69 @@
+# === Rendered output ===
+docs/*.html
+docs/*.pdf
+docs/*.epub
+docs/.asciidoctor/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Editors ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === KiCad ===
+# Backup and autosave files
+*-bak
+*-backups/
+_autosave-*
+# Caches
+fp-info-cache
+sym-lib-table.bak
+fp-lib-table.bak
+*.kicad_pcb.lck
+*.kicad_sch.lck
+# Output (gerbers, etc.) - keep these out of source; archive separately
+schematics/**/gerbers/
+schematics/**/production/
+schematics/**/*.gbr
+schematics/**/*.drl
+
+# === Fusion 360 / CAD ===
+mechanical/**/*.f3d.lock
+mechanical/**/*.bak
+mechanical/**/*.f3z.bak
+
+# === Firmware (ESP32 / PlatformIO) ===
+firmware/.pio/
+firmware/.pioenvs/
+firmware/.piolibdeps/
+firmware/.vscode/
+firmware/build/
+firmware/dist/
+firmware/__pycache__/
+firmware/*.pyc
+firmware/.venv/
+firmware/venv/
+
+# === Data: keep templates, ignore actual shot logs (privacy/size) ===
+# Uncomment when you have actual run data:
+# data/shot_logs/
+# data/raw/
+
+# === Python (general) ===
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# === Temp / sensitive ===
+*.tmp
+*.log
+.env
+.envrc
+secrets/

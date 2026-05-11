@@ -1,0 +1,41 @@
+[#sec-cap-bank]
+== Capacitor Bank (14-cap parallel, Topology A scaled)
+
+The Tour-group reference architecture, scaled up to 14 caps in pure parallel for higher delivered energy and per-cap stress relief. *Pure parallel* — no series stacking, no balancing resistors.
+
+[cols="2,3", options="header"]
+|===
+| Spec | Value
+
+| Capacitor          | 14 × Kemet ALS70A183QS400 (18 mF / 400 V, screw-terminal aluminum electrolytic)
+| Topology           | Pure parallel
+| Total capacitance  | 252 mF
+| Operating voltage  | 400 V
+| Stored energy      | ½CV² = *20.16 kJ*
+| Delivered energy   | *~14 kJ* at 70% efficiency
+| Cost (caps)        | ~$2,000
+| Chassis layout     | 7×2 grid (7 long × 2 deep)
+| Footprint          | ~70 cm × 25 cm (caps are 90 mm OD)
+| Bus bar            | 25 mm × 6 mm copper, two rails, ~80 cm length each (~$35 in materials)
+| SCR mounting       | Geometric center of bank for balanced loop inductance
+|===
+
+.Per-cap loading vs. previous 10-cap
+* Pulse current per cap drops from ~10% → ~7% of total (eases ESR-driven internal heating)
+* Aggregate bank ESR drops from ~1.0 mΩ → ~0.71 mΩ (estimated, ~14 caps in parallel)
+
+=== Bank-level support components
+
+[cols="2,2,3", options="header"]
+|===
+| Component | Spec | Purpose
+
+| Inrush-limit resistor   | ~25 Ω / 500 W | τ ≈ 6.3 s; protects caps and supply on first turn-on
+| Bleed resistor          | 12.5 kΩ / 50 W | τ ≈ 52 min, ~1.8 h to <50 V; 12.8 W steady-state
+| Dump SCR (or LEV200)    | Default-closed | Fail-safe; held closed by pull-down on reset/brownout
+| Freewheel diode         | Across bank    | Reverse-polarity protection
+| Per-cap fusing          | Recommended    | Limits failure-mode energy per cap
+| Bank thermistor         | Abort at 50 °C | Catches ESR-driven heating runaway
+|===
+
+CAUTION: Bleed alone takes ~1.8 hours to drop the bank to <50 V. *Always* trigger the dump-bleed path (~750 ms) before service.

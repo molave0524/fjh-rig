@@ -1,0 +1,119 @@
+[#sec-reaction-chamber]
+== Reaction Chamber
+
+=== Tube (baseline) — LOCKED
+
+[cols="2,3", options="header"]
+|===
+| Spec | Value
+
+| Dimensions    | *18 mm ID × 21.6 mm OD, 1.8 mm wall*
+| Material      | Clear fused quartz
+| Source        | *Wale Apparatus CFQ18X21.6* (~$55/tube, 4 ft length)
+| Cut length    | ~100–150 mm per shot column
+| Realistic life | 200–500 shots at 30 s cycles with active cooling
+|===
+
+.Rationale for 18 mm ID over 20 mm ID
+For 1 g feedstock at 14 kJ delivered, 18 mm geometry concentrates energy more effectively:
+
+* *18 mm cross-section*: ~254 mm² → *~55 J/mm² energy flux*
+* *20 mm cross-section*: ~314 mm² → ~45 J/mm² energy flux
+
+Higher current density matches published FJH process parameters (Tour group: 15–20 mm reactors for 1 g samples). Future scaling to 2+ g requires electrode redesign anyway; 18 mm baseline does not preclude that upgrade.
+
+=== Tube (upgrade path) — Hot-pressed BN
+
+* Hot-pressed boron nitride (HBT BN), 18 mm ID, $200/tube
+* Tolerates aggressive forced cooling without thermal-shock failure modes
+* *Softer than quartz* (Mohs ~2 vs ~7) — use sacrificial graphite or hard-ceramic spacer between metal electrode and BN end
+* *Higher CTE* (4 × 10⁻⁶ /K vs 0.5 × 10⁻⁶ /K for quartz) — leave clearance in any tight metal collar
+* Published FJH data on BN tubes is thin; the 1000+ shot figure is extrapolated from broader pulsed-power and ceramic-fatigue literature
+
+=== Electrodes — LOCKED: Architecture 4 (graphite puck + Cu push rod)
+
+For the 18 mm ID quartz tube and 1 g carbon-black feedstock, the electrode architecture is *Architecture 4: graphite puck + small-bore copper push rod*. The contact face inside the tube is full-bore graphite-on-carbon-on-graphite. Current is carried in by smaller-diameter copper push rods that act on the outer faces of the pucks; the push rod is fully decoupled from the electrical contact face and from the tube ID.
+
+.Architectures considered
+[cols="1,3,2", options="header"]
+|===
+| Arch | Configuration | Why not (vs. selected)
+
+| 1 | Solid Cu rod, full-bore           | Cu inclusions in product; face erosion; pyrometry contamination from Cu I lines (510/515/521 nm)
+| 2 | Solid graphite rod, full-bore      | 17.5 mm OD seal interface harder than necessary; brittle full-length rod is a handling liability
+| 3 | Cu rod with replaceable graphite end cap | Acceptable purity, but full 17.5 mm OD working face must translate inside the tube — much harder seal problem than the 10 mm push rod
+| *4* | *Graphite puck + Cu push rod (selected)* | Cleanest electrical interface (carbon-on-carbon-on-carbon); simplest seal (10 mm smooth rod); simplest reload (drop-in puck); pucks batch-producible; pyrometry stays clean
+|===
+
+[cols="2,3", options="header"]
+|===
+| Component | Spec
+
+| *Graphite puck* (sacrificial contact face) | Isotropic high-density graphite (POCO EDM-3, Mersen 2333, or equivalent). *17.5 mm OD* (tube ID − 0.5 mm clearance). *8–10 mm thick* baseline (5–15 mm acceptable). Both faces flat, perpendicular to axis, ~32 µin finish. *2 per shot*; held by column compression; discarded with column residue between shots.
+| *Copper push rod* (current carrier) | C110 OFHC. *10 mm OD* × 150–250 mm length (set by gland geometry and compression train). Ground to ≤16 µin over the sealing length. End-treatment TBD (see Q3 in pending). 2 per shot.
+|===
+
+.Geometry
+[source]
+----
+ ┌─── 18 mm ID quartz tube ───┐
+ │                            │
+ │ ┌──────┐  ┌──┐  ┌──────┐   │
+ │ │  Cu  │  │PG│  │  Cu  │   │
+═══▶│ rod │  │PG│  │ rod  │ ◀═══
+ │ │ 10mm │  │  │  │ 10mm │   │
+ │ └──────┘  └──┘  └──────┘   │
+ │                            │
+ │  ←push    ↑      push→     │
+ │           column           │
+ └────────────────────────────┘
+ PG = 17.5 mm graphite puck
+----
+
+.Why Arch 4 over Arch 3 (the more common published configuration)
+* Compressed sample column is only 5.6–8.4 mm tall (per CB height table). With Arch 3, the full 17.5 mm electrode face must translate inside the tube — forces the sliding seal to ride on a 17.5 mm OD surface vs. a 10 mm push rod
+* Carbon-on-carbon-on-carbon contact is the cleanest possible electrical interface; most stable contact resistance shot-to-shot
+* Pucks are batch-producible: ~30 pucks from a single 18 mm × 300 mm graphite rod (~$60 of stock)
+* No Cu I lines (510.5 / 515.3 / 521.8 nm) to mask out of pyrometry Planck fits
+
+.Cross-section margin
+10 mm Cu rod = 78.5 mm² — wildly over-spec'd for the 4200 A peak pulse. Resistive heating in the 250 mm push rod is on the order of mΩ, negligible against the 0.3–1 Ω column.
+
+=== Electrode operating envelope
+
+* Compression set by screw or pneumatic actuator with load-cell feedback
+* *Target sample bulk resistance: 1–10 Ω*
+** Below ~0.5 Ω: discharge too fast, ringing dominates
+** Above ~20 Ω: rectifier-side losses dominate before sample heats fully
+
+=== Open electrode design questions
+
+Six open items (Q1–Q6) remain in the electrode subsystem, tracked as `ELECTRODE-Q1` through `ELECTRODE-Q6` in `data/pending.yaml`:
+
+* *Q1*: Puck stock and grade (POCO EDM-3 / Mersen 2333 / surplus EDM)
+* *Q2*: Puck-to-rod contact face — flat-on-flat or counterbored capture
+* *Q3*: Push-rod end treatment — bare Cu, bonded graphite disc, or threaded graphite tip
+* *Q4*: Sliding seal / gland — PTFE bushing, graphite-impregnated, or O-ring + wiper
+* *Q5*: Compression train interface (load cell, lever, pneumatic ram, hand screw)
+* *Q6*: Tube-end termination — depends on Q4 (gland design)
+
+NOTE: Q2 is the recommended next decision because it ripples backward into puck specification. Once fixed, the 30-puck batch can be cut and Q3–Q6 proceed in parallel.
+
+=== Carbon black sample column heights (18 mm ID, 2.54 cm² cross-section)
+
+Furnace blacks run 0.10–0.25 g/cm³ loose (sometimes as low as 0.05 g/cm³ for extra-fluffy grades). Under FJH compression (5–50 MPa axial), they pack to roughly 0.7 g/cm³.
+
+[cols="1,2,2", options="header"]
+|===
+| Mass | Loose (~0.2 g/cm³) | Compressed (~0.7 g/cm³, resting state)
+
+| 1.0 g  | ~20 mm | ~5.6 mm
+| 1.25 g | ~25 mm | ~7.0 mm
+| 1.5 g  | ~30 mm | ~8.4 mm
+|===
+
+IMPORTANT: Resting-state heights (5.6–8.4 mm) define electrode spacing tolerance. Compression mechanism must span 6–10 mm with *<0.2 mm runout*. Load-cell feedback essential.
+
+=== 4-wire resistance probe
+
+Reads through its own ADC channel. Probe current source under microcontroller control — *disconnected before fire, reconnected after dump-bleed*.

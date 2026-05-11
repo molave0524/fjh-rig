@@ -1,0 +1,24 @@
+= Mechanical
+
+CAD files and mechanical drawings for the FJH rig.
+
+== Planned content
+
+* `bank-chassis/` — Capacitor bank enclosure (7×2 grid layout, 70 × 25 cm footprint)
+* `scr-fixture/` — N170CH12 W8 puck clamping fixture (Belleville stack, PEEK-isolated rods)
+* `reactor/` — Tube mount, electrode compression train, sample-handling mechanization
+* `enclosure/` — Faraday-shielded outer enclosure with interlocks
+* `drawings/` — 2D dimensioned drawings (PDF) for fabrication
+
+== File formats
+
+* *Source*: native CAD format (Fusion 360 `.f3d`, FreeCAD `.FCStd`, or whatever the project standardizes on)
+* *Interchange*: `.step` for cross-tool compatibility — commit STEP exports alongside native files
+* *Fabrication*: `.dxf` for laser/waterjet, `.stl` for 3D print — generate on demand, gitignored
+
+== Conventions
+
+* One assembly per subdirectory
+* Each part as its own file referenced from the assembly
+* Dimension all drawings in metric (mm)
+* Tolerance default: ±0.1 mm unless otherwise noted on the drawing

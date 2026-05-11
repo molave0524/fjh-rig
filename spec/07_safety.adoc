@@ -1,0 +1,33 @@
+[#sec-safety]
+== Safety / Interlocks
+
+=== Hardware
+
+* E-stop cuts CCPF mains
+* Bleed resistor permanently across bank
+* Dump defaults closed
+* Door locked until V_MON < 50 V
+
+=== Firmware FAULT state
+
+[source]
+----
+V_PROG = 0
+INHIBIT = high
+DUMP = closed
+GATE = inhibited
+Door = locked until V_MON < 50 V
+Pneumatics = de-energized
+Operator must physically reset
+----
+
+=== FAULT triggers
+* OV / OT from CCPF
+* V_MON > setpoint × 1.05
+* EOC missing past ~30 s
+* R_sample out of range
+* Argon flow loss
+* Load-cell anomaly
+* E-stop
+* Ground fault
+* Watchdog timeout

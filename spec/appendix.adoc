@@ -1,0 +1,28 @@
+== Appendix
+
+=== Revision History
+
+[cols="1,3", options="header"]
+|===
+| Revision | Changes
+
+| 14-cap-N170-W8-Wale-Arch4-Repo (current) | Repo conversion: spec split into per-subsystem files under `spec/`; structured BOM/pending moved to `data/`; placeholder folders for `schematics/`, `mechanical/`, `firmware/`
+| 14-cap-N170-W8-Wale-Arch4 | Electrode architecture locked: Arch 4 (graphite puck + Cu push rod); Q1–Q6 design questions tracked
+| 14-cap-N170-W8-Wale-AsciiDoc | Format conversion to AsciiDoc; gap-fill sections added (Diagnostics, Procedures); BOM extracted to CSV; Pending items extracted to YAML
+| 14-cap-N170-W8-Wale-18mm | Quartz tube locked: 18 mm ID × 21.6 mm OD (Wale Apparatus CFQ18X21.6)
+| 14-cap-N170-W8-Belden-CB | Carbon black height table (loose + resting-state); electrode spacing tolerance defined
+| 14-cap-N170-W8-Belden-MKS11030 | Vacuum gauge: MKS 901P-11030 KF (KF-25 direct mount)
+| 14-cap-N170-W8-Belden | Belden 8267 power cabling (3 × 2 m runs)
+| 14-cap-N170-W8 | N170CH12 W8 puck dimensions and full datasheet
+| 14-cap-N170 | SCR changed Powerex T627 → WESTCODE N170CH12
+| 14-cap | Bank scaled 10→14 × 18 mF; stored energy 14.4→20 kJ
+| 10-cap (superseded) | 10 × 18 mF / 400 V parallel; 14.4 kJ stored
+|===
+
+=== Known Confabulation History
+
+These items were caught and corrected during specification development; documented here to prevent regression:
+
+* "Coilcraft VPH4-0190" — *part does not exist*. Correct part: *SD250-3L*.
+* 80 µs gate width — *saturates SD250-3L core*. Corrected to 25–40 µs.
+* "ChemGlass 4100N32" quartz tube — *part not in ChemGlass catalog*. Actual source: *Wale Apparatus CFQ18X21.6*.

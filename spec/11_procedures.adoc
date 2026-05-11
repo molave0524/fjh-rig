@@ -1,0 +1,54 @@
+[#sec-procedures]
+== Procedures [GAP-FILL]
+
+CAUTION: Procedure sections are placeholder skeletons. Each requires further development before commissioning.
+
+=== First-light commissioning (skeleton)
+
+. Insulation / hipot test of bank with caps disconnected
+. Cap reformation procedure (manufacturer spec) if caps stored >6 months
+. Bank charge to *50 V only* (5% of operating voltage), verify V_MON reading and bleed
+. Bank charge to 100 V, dump-bleed test, verify time constant
+. Bank charge to 200 V, fire into *graphite powder* (known-good test feedstock) at low compression
+. Verify Rogowski + divider waveforms match predicted (peak current, ringing, decay)
+. Step up in 50 V increments to operating point (400 V)
+
+=== Normal operation SOP (placeholder — to develop)
+
+=== Maintenance schedule (placeholder)
+
+* Tube inspection and replacement (200–500 shot life)
+* Electrode wear inspection
+* Cap bank ESR check (annual)
+* Bleed resistor visual / thermal check
+* Argon supply pressure check
+
+=== Emergency response (placeholder)
+
+* Cap bank fault / fire response
+* Tube rupture response
+* HV exposure response
+
+== Bill of Materials Summary
+
+See `data/bom.csv` for the structured BOM (renders as a sortable table on GitHub). Cost summary by subsystem:
+
+[cols="2,1", options="header"]
+|===
+| Subsystem | Cost
+
+| CCPF-1700-1.5P-SYS (used)                      | $800–1,500
+| 14 × ALS70A183QS400 caps                       | ~$2,000
+| Bus bar, terminations, fusing                  | $80–150
+| Bleed + inrush + dump components               | $120–250
+| WESTCODE N170CH12 SCR + clamping fixture       | $200–400
+| Gate driver (SD250, MOSFET, opto, snubber)     | $30–50
+| Reaction tube + electrodes                     | $100–300
+| Argon plumbing                                 | $300–600
+| Vacuum pump + cold trap + gauges               | $500–1,000
+| ESP32-S3 + DAC + ADC + support                 | $80–150
+| Power cabling (Belden 8267) + interconnects    | $80–150
+| Enclosure, interlocks, wiring                  | $200–400
+| Diagnostics (Rogowski, divider, scope, photodiode) [GAP-FILL] | $400–1,500
+| *Total*                                        | *~$4,800–8,300*
+|===

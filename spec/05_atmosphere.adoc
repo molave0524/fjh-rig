@@ -1,0 +1,21 @@
+[#sec-atmosphere]
+== Atmosphere / Vacuum System
+
+[cols="2,3", options="header"]
+|===
+| Component | Spec
+
+| Pump          | 3.5 cfm rotary vane (~$200–500 used)
+| Chamber gauge | *MKS 901P-11030 KF* (10⁻⁵–1000 Torr, KF-25 flange, *direct chamber mount, no adapter*, ~$170–200 used)
+| Pressure ref  | MKS 722A02T 10 Torr Baratron
+| Backup gauge  | Convectron
+| Cold trap     | LN₂ U-tube between reactor and pump
+| Argon plumbing | 1/4" SS, Swagelok, 7 µm filter, MFC, check valve
+|===
+
+.Operating modes
+* *Argon flush* (~1 atm): standard, lowest tooling burden, addresses oxygen/nitrogen contamination
+* *7.6 Torr*: rough vacuum, removes most reactive species
+* *10 mTorr*: higher vacuum, longer carbon-vapor mean free path → larger flake sizes, sharper Raman 2D, better turbostratic stacking
+
+NOTE: Vacuum gives ~5–10% yield improvement over argon flush, with measurably larger flake sizes. Argon-flush is the right starting mode; vacuum is a process upgrade, not a hardware redesign.

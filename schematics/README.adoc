@@ -1,0 +1,20 @@
+= Schematics
+
+KiCad project files for the FJH rig.
+
+== Planned content
+
+* `main/` — Primary KiCad project: gate driver board, ESP32-S3 carrier, signal isolation
+* `bank-monitoring/` — Bank voltage monitor, thermistor conditioning, bleed-status sense
+* `interlocks/` — E-stop loop, door switches, fault aggregator
+
+== Conventions
+
+* One KiCad project per board
+* Each project in its own subdirectory
+* Generated outputs (gerbers, drill files) go in `gerbers/` under each project (gitignored — produce on demand)
+* PDF schematic exports committed under each project's `docs/`
+
+== When this folder is populated
+
+Update this README with a board-by-board status table.

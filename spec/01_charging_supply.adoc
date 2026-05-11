@@ -1,0 +1,30 @@
+[#sec-charging-supply]
+== Charging Supply: Lumina CCPF-1700-1.5P-SYS
+
+Capacitor charging power supply, 1.5 kV / 1700 J/sec class (tested at 1000 J/s on this serial), shoebox form factor (~13" × 6" × 4"), originally built for pulsed-laser cap-charging duty.
+
+.Key parameters (from factory test sheet)
+* 0–1500 V output, programmable via 0–10 V analog input (1500 V/V scale)
+* Voltage regulation ≤ ±5 V at full scale; ±30 V at 25% setpoint
+* Ripple ~14–15 V_pp_ across the operating range (≤ 20 V_pp_ spec)
+* 1000 J/s sustained charge rate (test sheet figure)
+* No slow-start delay
+* Hipot certified at the factory
+
+.Operating point in this rig
+[cols="2,3"]
+|===
+| V_PROG = 2.667 V       | → V_OUT = 400 V
+| Charge time for 20 kJ  | ~20 s
+| Operating fraction     | 27% of full-scale (just above regulation knee)
+| Avg supply current     | ~2.5 A during charge (power-limited)
+|===
+
+WARNING: Operating at 27% of full scale is just above the regulation knee. Verify linearity on the unit's test sheet before commissioning.
+
+.Wiring
+* AC input: 220 VAC, ~15 A (3-position block: L, N, Earth)
+* HV output: use *CAP+* terminal (verify continuity to PFN+ unpowered)
+* 15-pin INTERFACE D-sub: V_PROG, V_MON, INHIBIT, EOC, OV fault, OT fault, +15 V aux
+* Chassis ground stud to frame
+* AUX rails (±12, +5, +24, fan), SIM, TRG: not connected — not needed for FJH duty

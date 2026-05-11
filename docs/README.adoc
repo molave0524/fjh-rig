@@ -1,0 +1,23 @@
+= Rendered Output
+
+This folder holds rendered HTML/PDF/EPUB output from the AsciiDoc sources in `spec/`.
+
+Contents are gitignored — produce on demand from source.
+
+== Generating output
+
+[source,shell]
+----
+# HTML (single file with embedded CSS)
+asciidoctor spec/main.adoc -o docs/spec.html
+
+# PDF (requires asciidoctor-pdf)
+asciidoctor-pdf spec/main.adoc -o docs/spec.pdf
+
+# EPUB (requires asciidoctor-epub3)
+asciidoctor-epub3 spec/main.adoc -o docs/spec.epub
+----
+
+== Why gitignore the rendered output
+
+Rendered files diff poorly (huge churn on small source changes), bloat the repo, and can drift from source. Always regenerate from `spec/main.adoc`.

@@ -1,0 +1,46 @@
+= FJH Rig Specification: Flash Joule Heating Reactor for 1 g Graphene Production
+:revnumber: 14-cap-N170-W8-Wale-Arch4
+:revdate: 2026-05-10
+:revremark: Repo conversion + per-subsystem file split
+:toc: left
+:toclevels: 3
+:sectnums:
+:sectnumlevels: 3
+:icons: font
+:source-highlighter: rouge
+:experimental:
+
+[abstract]
+== Abstract
+
+Bench-scale Flash Joule Heating (FJH) rig for converting 1 g of carbonaceous feedstock per shot (carbon black, calcined coke, biochar) into turbostratic flash graphene. Headline: 14-cap bank @ 252 mF / 400 V delivers ~14 kJ per shot; ~30 s cycle time; argon-flush or vacuum atmosphere; 18 mm ID quartz reactor.
+
+NOTE: This document is a *working specification*. Treat any specific number as a starting point for verification, not a guarantee.
+
+include::00_overview.adoc[]
+
+= Subsystems
+
+include::01_charging_supply.adoc[]
+
+include::02_capacitor_bank.adoc[]
+
+include::03_discharge_switch.adoc[]
+
+include::04_reaction_chamber.adoc[]
+
+include::05_atmosphere.adoc[]
+
+include::06_control_electronics.adoc[]
+
+include::07_safety.adoc[]
+
+include::08_power_cabling.adoc[]
+
+include::09_diagnostics.adoc[]
+
+include::10_fsm_timing.adoc[]
+
+include::11_procedures.adoc[]
+
+include::appendix.adoc[]

@@ -1,0 +1,16 @@
+[#sec-control-electronics]
+== Control Electronics: ESP32-S3
+
+[cols="2,3", options="header"]
+|===
+| Function | Implementation
+
+| V_PROG output      | MCP4922 12-bit SPI DAC → op-amp scaler → CCPF V_PROG input
+| V_MON read         | ADS1115 16-bit I²C ADC
+| INHIBIT line       | Opto-isolated FET
+| EOC input          | Hardware-interrupt pin
+| SCR gate pulse     | Hardware timer (deterministic)
+| Dump line default  | Pull-down → dump-closed (fail-safe on reset/brownout)
+| Isolation          | All boundary signals opto-isolated, ferrite-choked
+| ESP32 power        | Isolated wall-wart, *never tied to bank ground*
+|===

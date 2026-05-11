@@ -1,0 +1,23 @@
+[#sec-fsm]
+== State Machine and Cycle Timing
+
+=== Charge branch
+`IDLE → CHARGE → READY_TO_FIRE → FIRE → POST_DISCH → DUMP_BLEED (~750 ms) → IDLE`
+
+=== Sample branch
+`IDLE → EJECT → LOAD → AR_PURGE → COMPRESS → R_VERIFY → READY_TO_FIRE → POST_FIRE_HOLD → IDLE`
+
+=== Cycle timing
+
+[cols="2,1", options="header"]
+|===
+| Phase | Duration
+
+| Charge (20 kJ @ 1000 J/s) | ~20 s
+| Sample handling           | ~20–25 s
+| FIRE + discharge          | <1 s
+| Dump-bleed                | ~0.75 s
+| *Effective cycle*         | *~25–30 s*
+|===
+
+The charge branch is the cycle gate (was the sample branch in the 10-cap config).

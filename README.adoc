@@ -1,0 +1,116 @@
+= FJH Rig
+:toc:
+:toclevels: 2
+
+Bench-scale Flash Joule Heating reactor for 1 g flash-graphene production per shot.
+
+== Status
+
+[cols="1,3", options="header"]
+|===
+| Phase | State
+
+| Specification    | Substantially complete (rev: 14-cap-N170-W8-Wale-Arch4)
+| Sourcing         | In progress; major parts identified, some PNs pending
+| Build            | Not started
+| Commissioning    | Not started
+| First shot       | Blocked on: gate driver bench test, sample handling design, diagnostics sourcing
+|===
+
+== Quick reference
+
+[cols="1,2", options="header"]
+|===
+| Parameter | Value
+
+| Bank stored energy   | ~20 kJ (252 mF @ 400 V, 14 caps parallel)
+| Delivered energy     | ~14 kJ at 70% efficiency
+| Cycle time           | ~25–30 s
+| Reactor tube         | 18 mm ID × 21.6 mm OD quartz (Wale CFQ18X21.6)
+| Discharge switch     | WESTCODE N170CH12 W8 puck
+| Charging supply      | Lumina CCPF-1700-1.5P-SYS
+| Electrodes           | Architecture 4: graphite puck + Cu push rod
+| Atmosphere           | Argon flush / 7.6 Torr / 10 mTorr
+| Estimated build cost | $4,800–8,300
+|===
+
+== Repository layout
+
+[source]
+----
+fjh-rig/
+├── README.adoc           ← This file
+├── spec/                 ← Technical specification (AsciiDoc)
+│   ├── main.adoc         ← Master doc; includes all subsystem files
+│   ├── 00_overview.adoc
+│   ├── 01_charging_supply.adoc
+│   ├── 02_capacitor_bank.adoc
+│   ├── 03_discharge_switch.adoc
+│   ├── 04_reaction_chamber.adoc
+│   ├── 05_atmosphere.adoc
+│   ├── 06_control_electronics.adoc
+│   ├── 07_safety.adoc
+│   ├── 08_power_cabling.adoc
+│   ├── 09_diagnostics.adoc
+│   ├── 10_fsm_timing.adoc
+│   ├── 11_procedures.adoc
+│   └── appendix.adoc     ← Revision history + confabulation history
+├── data/                 ← Structured project data
+│   ├── bom.csv           ← Bill of materials
+│   ├── pending.yaml      ← Open items, gaps, design questions
+│   └── shot_log_template.csv  ← Per-shot logging schema
+├── schematics/           ← (Placeholder) KiCad project files
+├── mechanical/           ← (Placeholder) CAD/STEP files
+├── firmware/             ← (Placeholder) ESP32-S3 source
+└── docs/                 ← (gitignored) Rendered HTML/PDF output
+----
+
+== Reading order
+
+For someone picking this up cold:
+
+. Read this README
+. Skim `spec/00_overview.adoc` for purpose and architecture
+. Open `data/bom.csv` (renders nicely on GitHub) for sourcing state
+. Open `data/pending.yaml` for the open work list
+. Dive into specific subsystem files in `spec/` as needed
+
+== Rendering the spec
+
+[cols="2,3", options="header"]
+|===
+| Environment | How to view rendered output
+
+| GitHub web   | All `.adoc` files render natively in the browser
+| github.dev   | Press `.` on the repo to open VS Code in browser; install AsciiDoc extension for live preview
+| Local CLI    | `gem install asciidoctor && asciidoctor spec/main.adoc -o docs/spec.html`
+| Local PDF    | `gem install asciidoctor-pdf && asciidoctor-pdf spec/main.adoc -o docs/spec.pdf`
+| VS Code      | Install "AsciiDoc" extension; live preview pane works
+|===
+
+== Critical pending work
+
+. `ELECTRODE-Q2` — puck-to-rod contact geometry (recommended next decision; ripples back into puck spec)
+. `BENCH-GATE` — bench-test N170CH12 gate trigger with SD250-3L (blocks first shot)
+. `DESIGN-SAMPLE-HANDLING` — sample-handling mechanization
+. `GAP-DIAGNOSTICS-SOURCE` — Rogowski coil + HV divider procurement
+
+See `data/pending.yaml` for the full list with priorities and dependencies.
+
+== Conventions
+
+* *LOCKED* in spec text: decision is final and should not be revisited without explicit reason
+* *[GAP-FILL]* in section headings: content added during the 2026-05-10 gap-analysis pass
+* Pending item ID prefixes: `VERIFY-*` (validation), `BENCH-*` (bench tests), `DESIGN-*` (open design), `GAP-*` (gap-fill), `ELECTRODE-*` (electrode design Q1–Q6), `FUTURE-*` (deferred), `RES-*` (resolved)
+
+== Known confabulation history
+
+Items caught during specification development, recorded to prevent regression. Full list in `spec/appendix.adoc`. Summary:
+
+* "Coilcraft VPH4-0190" — *part does not exist*; correct part is *SD250-3L*
+* 80 µs gate pulse width — saturates SD250-3L core; corrected to 25–40 µs
+* "ChemGlass 4100N32" — not in ChemGlass catalog; actual source is *Wale Apparatus CFQ18X21.6*
+
+== License / Project info
+
+Private project. Not for distribution. See LICENSE for terms if added.

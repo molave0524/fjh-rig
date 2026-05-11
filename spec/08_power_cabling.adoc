@@ -1,0 +1,11 @@
+[#sec-power-cabling]
+== Power and Interconnect Cabling: Belden 8267
+
+* *Mains AC power cable*: Belden 8267 (semi-rigid coax, 75 Ω)
+* *3 × 2 m runs*:
+. Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth); shield to enclosure frame
+. Run 2: CCPF AC ground → rig chassis ground (star-point safety earth)
+. Run 3: E-stop circuit loop (redundant mains disconnect path)
+* Shield grounded *single-point* at enclosure frame only (avoid ground loops)
+* Signal cabling: STP with ferrite clamps for V_PROG/V_MON/INHIBIT/EOC; twisted pair for gate drive
+* Discharge loop: *wide flat copper busbars only* (no cable); short heavy copper tubing or braided strap from SCR to reactor

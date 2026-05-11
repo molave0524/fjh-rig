@@ -1,0 +1,45 @@
+[#sec-discharge-switch]
+== Discharge Switch: WESTCODE N170CH12 Press-Pack Thyristor
+
+[cols="2,3", options="header"]
+|===
+| Spec | Value
+
+| Package          | W8 (19 mm diameter puck, 70 g)
+| Voltage          | 1200 V
+| Average current  | 339 A
+| Pulse current (ITSM) | 4200 A
+| I²t              | 88.2 × 10³ A²s
+| V_T0_            | 1.080 V
+| r_T_             | 1.300 mΩ
+| R_thJK_          | 0.095 K/W (180° sine)
+|===
+
+=== Clamping fixture
+
+* Aluminum/copper plates min 6 mm thick
+* 4× steel rods
+* *PEEK sleeves + shoulder washers* (electrical isolation between rods and plates)
+* Guide fixture for 19 mm puck centering
+* Belleville washers at 1.5 mm deflection → 10–20 kN clamping force
+* Verify contact uniformity post-assembly
+
+=== Gate driver
+
+[source]
+----
+ESP32 GPIO → opto-isolated MOSFET → Coilcraft SD250-3L → SCR gate
+----
+
+[cols="2,3", options="header"]
+|===
+| Parameter | Value
+
+| Gate pulse amplitude | 5–10 V peak, 1–1.5 A
+| Rise time            | <1 µs
+| Pulse width          | ~25–40 µs (hardware timer; *not* 80 µs — saturates SD250-3L)
+| Snubber              | R-C across SCR
+| Gate routing         | Twisted pair, away from bus bar
+|===
+
+NOTE: Earlier specs referenced "Coilcraft VPH4-0190" — *this part does not exist*. Correct part is *SD250-3L*. Earlier specs also called for 80 µs gate width — this saturates the SD250-3L core; corrected to 25–40 µs.

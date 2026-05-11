@@ -1,0 +1,70 @@
+== Purpose and Headline Performance
+
+A bench-scale FJH rig targeted at research-grade material quality with operational tempo suitable for production characterization runs.
+
+[cols="1,2", options="header"]
+|===
+| Parameter | Target
+
+| Feedstock per shot         | 1 g (headroom to 1.4–2 g)
+| Bank stored energy         | ~20 kJ
+| Bank delivered energy      | ~14 kJ at 70% efficiency
+| Specific energy at 1 g     | ~14 kJ/g (2× the 7 kJ/g threshold)
+| Cycle time                 | ~25–30 s (charge-branch limited)
+| Operating atmosphere       | Argon flush (1 atm) or 7.6 Torr / 10 mTorr vacuum
+| Reactor tube               | 18 mm ID quartz (baseline); BN as upgrade path
+|===
+
+.Why 14 caps over the previous 10-cap configuration
+[%collapsible]
+====
+* 40% more delivered energy at the same operating voltage (10 kJ → 14 kJ)
+* 2× the threshold-energy margin per gram (1.4× → 2× safety factor)
+* Headroom to flash up to ~2 g per shot without rebuilding the bank
+* Per-cap pulse-current loading drops by ~30%, easing electrolyte heating
+* Trade-off: charge time roughly doubles to ~20 s; the *charge branch is now the cycle-time gate* rather than the sample branch
+====
+
+== Architecture Overview
+
+[source]
+----
+ ┌───────────────────────────────────────────────────┐
+ │ ESP32-S3 Safety Controller                        │
+ │ (DAC, ADC, opto-isolated I/O, hardware watchdog)  │
+ └───┬───────────────┬─────────────┬─────────────────┘
+     │               │             │
+ V_PROG /            │ SCR         │ Pneumatics      │ Interlocks
+ V_MON  /            │ gate fire   │ & gas           │ & operator I/O
+ INHIBIT             │             │
+     ▼               ▼             ▼
+ ┌─────────────┐  ┌──────────┐  ┌──────────────────┐
+ │ CCPF-1700   │  │ N170CH12 │  │ Door locks,      │
+ │ 1.5P-SYS    │  │ Press-   │  │ argon valve,     │
+ │ Charger     │  │ pack     │  │ compression      │
+ │ (1.5 kV)    │  │ SCR      │  │ actuator,        │
+ └──────┬──────┘  └────┬─────┘  │ R-probe, etc.    │
+        │              │        └──────────────────┘
+ Inrush │              │ HV+
+ limit  │              │
+ resistor│             │
+        ▼              │
+ ┌─────────────────────┐│
+ │ Capacitor Bank      ││
+ │ 14 × 18 mF / 400 V  ││
+ │ in parallel (7×2)   ││ Discharge loop
+ │ 252 mF, ~20 kJ      │┘ (low-inductance bus bar)
+ │ + bleed R           │
+ │ + dump SCR          │
+ └──────────┬──────────┘
+            │
+            ▼
+   ┌─────────────────┐
+   │ Reaction tube   │
+   │ (18 mm quartz)  │
+   │ electrodes,     │
+   │ compressed      │
+   │ feedstock,      │
+   │ argon / vacuum  │
+   └─────────────────┘
+----

@@ -1,0 +1,253 @@
+# FJH Rig Pending Items
+# Status: open | in-progress | blocked | verified | deferred
+# Priority: critical | high | medium | low
+
+pending:
+  - id: VERIFY-CCPF-LIN
+    description: Verify CCPF regulation linearity at 400 V (27% of full scale)
+    status: open
+    priority: high
+    subsystem: charging-supply
+    blocks: commissioning
+
+  - id: VERIFY-CCPF-RATE
+    description: Verify actual charge rate (1000 J/s test vs 1700 J/s nameplate)
+    status: open
+    priority: medium
+    subsystem: charging-supply
+    notes: Affects cycle-time predictions
+
+  - id: VERIFY-CAP-PFN
+    description: Verify CAP+ / PFN+ continuity unpowered on CCPF
+    status: open
+    priority: high
+    subsystem: charging-supply
+    notes: Determines correct HV output terminal
+
+  - id: BENCH-GATE
+    description: Bench-test N170CH12 gate trigger with SD250-3L at 25-40 us pulse width
+    status: open
+    priority: critical
+    subsystem: discharge-switch
+    blocks: first-shot
+    notes: Confirms gate driver design before integration
+
+  - id: VERIFY-CLAMP
+    description: Verify clamping fixture contact uniformity on W8 19 mm puck post-assembly
+    status: open
+    priority: high
+    subsystem: discharge-switch
+    notes: Belleville stack 1.5 mm deflection target
+
+  - id: SIZE-INRUSH
+    description: Size inrush resistor for cold full-bank charge at 252 mF
+    status: open
+    priority: high
+    subsystem: capacitor-bank
+    notes: Current spec ~25 ohm/500W is starting estimate
+
+  - id: VERIFY-SHIELD
+    description: Verify Belden 8267 shield grounding (single-point at enclosure frame only)
+    status: open
+    priority: medium
+    subsystem: power-cabling
+    notes: Avoid ground loops
+
+  - id: VERIFY-BUSBAR-L
+    description: Bus bar inductance verification on first hot shot
+    status: open
+    priority: medium
+    subsystem: capacitor-bank
+    notes: Compare measured peak current to predicted
+
+  - id: DESIGN-SAMPLE-HANDLING
+    description: Sample-handling mechanization design
+    status: open
+    priority: critical
+    subsystem: reaction-chamber
+    notes: Biggest remaining mechanical task; covers feedstock weighing, tube loading, post-flash extraction
+    blocks: production-tempo
+
+  - id: GAP-DIAGNOSTICS-SOURCE
+    description: Source Rogowski coil + HV divider; confirm scope availability
+    status: open
+    priority: critical
+    subsystem: diagnostics
+    notes: Without these no shot verification possible
+
+  - id: GAP-HEPA-FILTRATION
+    description: Specify HEPA filtration for graphene dust + cold trap on exhaust
+    status: open
+    priority: high
+    subsystem: atmosphere
+    notes: Respiratory hazard
+
+  - id: GAP-EMI-SHIELDING
+    description: Specify EMI shielding around bank/discharge loop
+    status: open
+    priority: high
+    subsystem: enclosure
+    notes: kA discharge generates severe EMP
+
+  - id: GAP-ACTIVE-COOLING
+    description: Specify active cooling system (tube/electrodes/bank)
+    status: open
+    priority: medium
+    subsystem: reaction-chamber
+    notes: Referenced in tube-life claim but not designed
+
+  - id: GAP-ARGON-SUPPLY
+    description: Specify argon regulator/cylinder size/purity grade
+    status: open
+    priority: medium
+    subsystem: atmosphere
+    notes: UHP 5N likely; backflow protection needed
+
+  - id: GAP-COMMISSIONING-SOP
+    description: Develop full first-light commissioning procedure
+    status: open
+    priority: critical
+    subsystem: procedures
+    notes: Skeleton in spec; needs full step-by-step
+
+  - id: GAP-OPERATOR-SOP
+    description: Develop normal-operation SOP and operator PPE specification
+    status: open
+    priority: high
+    subsystem: procedures
+    notes: HV operation; consider two-person rule
+
+  - id: GAP-EMERGENCY-SOP
+    description: Develop emergency response procedures
+    status: open
+    priority: high
+    subsystem: procedures
+    notes: Cap fault, tube rupture, fire, HV exposure
+
+  - id: GAP-SHOT-LOG
+    description: Implement per-shot data logging in firmware
+    status: open
+    priority: high
+    subsystem: control-electronics
+    notes: V_cap_at_fire, peak_I, R_sample_pre/post, energy_delivered, atmosphere mode, compression force
+
+  # === Electrode design (Architecture 4: graphite puck + Cu push rod) ===
+  # Tracked in dependency order. Q2 recommended first (ripples back to puck spec).
+
+  - id: ELECTRODE-Q1
+    description: Select graphite puck stock and grade (POCO EDM-3 / Mersen 2333 / surplus EDM)
+    status: open
+    priority: medium
+    subsystem: reaction-chamber
+    notes: Driver is ash content - matters for ICP-MS product purity; otherwise surplus is fine. Affects procurement only, no geometry impact.
+
+  - id: ELECTRODE-Q2
+    description: Puck-to-push-rod contact face geometry (flat-on-flat vs. counterbored capture)
+    status: open
+    priority: high
+    subsystem: reaction-chamber
+    notes: |
+      RECOMMENDED NEXT DECISION. Ripples backward into puck thickness spec.
+      Flat-on-flat: simplest machining, max contact area, but puck can cock during reload.
+      Counterbored end: ~14mm x 1-2mm recess captures puck rim, prevents cocking, slightly less perimeter contact.
+    blocks: [ELECTRODE-Q3, ELECTRODE-puck-batch]
+
+  - id: ELECTRODE-Q3
+    description: Push-rod end treatment (bare Cu / bonded graphite disc / threaded graphite tip)
+    status: open
+    priority: medium
+    subsystem: reaction-chamber
+    depends_on: ELECTRODE-Q2
+    notes: Trade-off is up-front machining time vs. how often you re-face the push rod for arc damage.
+
+  - id: ELECTRODE-Q4
+    description: Sliding seal / gland design (PTFE bushing / graphite-impregnated / O-ring + wiper)
+    status: open
+    priority: high
+    subsystem: reaction-chamber
+    notes: Substantially simplified by Arch 4 (10mm rod vs 17.5mm working face). Driver is operating atmosphere (argon at atm vs vacuum modes from main spec).
+    blocks: ELECTRODE-Q6
+
+  - id: ELECTRODE-Q5
+    description: Compression train interface (load cell, lever, pneumatic ram, hand screw)
+    status: open
+    priority: medium
+    subsystem: reaction-chamber
+    notes: Now fully decoupled from discharge geometry under Arch 4. Standard mechanical interface; can be addressed independently.
+
+  - id: ELECTRODE-Q6
+    description: Tube-end termination housing (caps/seals + push rod entry geometry)
+    status: open
+    priority: medium
+    subsystem: reaction-chamber
+    depends_on: ELECTRODE-Q4
+    notes: Driver is argon flush vs vacuum pull-down requirements; rebuildable per shot or per N shots.
+
+  - id: ELECTRODE-puck-batch
+    description: Cut 30-puck batch from 18mm graphite rod stock once Q1 and Q2 resolved
+    status: blocked
+    priority: medium
+    subsystem: reaction-chamber
+    depends_on: [ELECTRODE-Q1, ELECTRODE-Q2]
+    notes: ~$60 of stock yields ~30 pucks. Use bandsaw or cutoff wheel; one face per puck only needs lapping if stock face finish insufficient.
+
+future:
+  - id: FUTURE-LARGER-TUBE
+    description: 22-25 mm tube ID for >1 g batches
+    status: deferred
+    notes: Requires electrode redesign
+
+  - id: FUTURE-FILM-CAPS
+    description: Film cap upgrade
+    status: deferred
+    notes: When electrolytic life becomes operationally annoying
+
+  - id: FUTURE-PYROMETRY
+    description: In-situ pyrometry
+    status: deferred
+    notes: Separate work item; optical fiber to spectrometer
+
+  - id: FUTURE-TRANSLATING-ELECTRODE
+    description: Translating-electrode option
+    status: deferred
+    notes: Reserved for future iteration
+
+resolved:
+  - id: RES-SCR-SELECTION
+    description: SCR selection finalized
+    status: verified
+    resolution: WESTCODE N170CH12 W8 puck
+
+  - id: RES-TUBE-SPEC
+    description: Quartz tube spec locked
+    status: verified
+    resolution: 18 mm ID x 21.6 mm OD (Wale Apparatus CFQ18X21.6)
+
+  - id: RES-VAC-GAUGE
+    description: Chamber pressure gauge selected
+    status: verified
+    resolution: MKS 901P-11030 KF (KF-25 direct mount)
+
+  - id: RES-MAINS-CABLE
+    description: Mains AC cabling spec
+    status: verified
+    resolution: Belden 8267 (3 x 2 m runs)
+
+  - id: RES-GATE-PART
+    description: Gate driver pulse transformer corrected
+    status: verified
+    resolution: Coilcraft SD250-3L (was nonexistent VPH4-0190)
+
+  - id: RES-GATE-WIDTH
+    description: Gate pulse width corrected
+    status: verified
+    resolution: 25-40 us (was 80 us; saturated SD250-3L core)
+
+  - id: RES-ELECTRODE-ARCH
+    description: Electrode architecture selected (4 candidates evaluated)
+    status: verified
+    resolution: |
+      Architecture 4: graphite puck (17.5mm OD x 8-10mm thick, isotropic high-density) + Cu push rod (C110 OFHC, 10mm OD x 150-250mm).
+      Selected over solid Cu rod, solid graphite rod, and Cu rod with replaceable graphite end cap.
+      Decoupled contact face from current carrier; carbon-on-carbon-on-carbon interface; simpler 10mm seal vs 17.5mm.
+      Puck is sacrificial (2 per shot, ~$2 each, ~30 from a $60 rod).

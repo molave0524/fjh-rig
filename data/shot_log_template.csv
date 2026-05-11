@@ -1,0 +1,1 @@
+shot_number,timestamp_utc,v_cap_at_fire_V,v_cap_residual_V,r_sample_pre_ohm,r_sample_post_ohm,energy_delivered_J,atmosphere_mode,compression_force_N,argon_flow_sccm,peak_current_kA,fault_flags,operator_notes

@@ -1,0 +1,25 @@
+= Firmware
+
+ESP32-S3 source code for the FJH rig safety controller.
+
+== Planned content
+
+* `src/` — Main firmware source (C++ / Arduino or ESP-IDF — TBD)
+* `lib/` — Local libraries (DAC, ADC, opto drivers)
+* `test/` — Unit tests for the FSM and fault-handler logic
+* `tools/` — Helper scripts (shot-log parser, calibration utilities)
+* `platformio.ini` or `CMakeLists.txt` — build config (depending on chosen framework)
+
+== Architecture
+
+The firmware implements two parallel FSMs (charge branch, sample branch) per the spec, with a hard-priority FAULT state that overrides both. All boundary signals to/from the bank are opto-isolated. Hardware timers drive the SCR gate pulse for deterministic firing.
+
+See `spec/06_control_electronics.adoc` and `spec/07_safety.adoc` for the controller architecture and `spec/10_fsm_timing.adoc` for the state machine.
+
+== Per-shot data log
+
+Schema in `data/shot_log_template.csv`. Logged to non-volatile storage (SPIFFS or SD) on every shot. See `GAP-SHOT-LOG` in `data/pending.yaml`.
+
+== Framework decision (open)
+
+Arduino-style vs ESP-IDF — to decide before firmware work starts. Arduino is faster to ship; ESP-IDF gives better real-time guarantees for the gate-pulse timing.
