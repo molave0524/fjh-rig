@@ -16,13 +16,13 @@ The Tour-group reference architecture, scaled up to 14 caps in pure parallel for
 | Cost (caps)        | ~$2,000
 | Chassis layout     | 7×2 grid (7 long × 2 deep)
 | Footprint          | ~70 cm × 25 cm (caps are 90 mm OD)
-| Bus bar            | 25 mm × 6 mm copper, two rails, ~80 cm length each (~$35 in materials)
+| Bus bar            | 25 mm × 6 mm copper, two rails, ~80 cm length each (~$35 in materials). Forms the *bank-to-SCR* segment of the discharge loop. For the complete loop including SCR-to-reactor segment, see `spec/08_power_cabling.adoc` (`#sec-power-cabling`).
 | SCR mounting       | Geometric center of bank for balanced loop inductance
 |===
 
 .Per-cap loading vs. previous 10-cap
 * Pulse current per cap drops from ~10% → ~7% of total (eases ESR-driven internal heating)
-* Aggregate bank ESR drops from ~1.0 mΩ → ~0.71 mΩ (estimated, ~14 caps in parallel)
+* Aggregate bank ESR drops from ~1.30 mΩ (10-cap) → ~0.93 mΩ (14-cap), based on Kemet datasheet ESR of 13 mΩ per cap at 100 Hz / 20 °C. Earlier spec revisions cited ~1.0 → ~0.71 mΩ; these used an unsourced ~10 mΩ per-cap figure and have been corrected against the Kemet ALS70A183QS400 datasheet.
 
 === Bank-level support components
 
@@ -33,9 +33,64 @@ The Tour-group reference architecture, scaled up to 14 caps in pure parallel for
 | Inrush-limit resistor   | ~25 Ω / 500 W | τ ≈ 6.3 s; protects caps and supply on first turn-on
 | Bleed resistor          | 12.5 kΩ / 50 W | τ ≈ 52 min, ~1.8 h to <50 V; 12.8 W steady-state
 | Dump SCR (or LEV200)    | Default-closed | Fail-safe; held closed by pull-down on reset/brownout
-| Freewheel diode         | Across bank    | Reverse-polarity protection
-| Per-cap fusing          | Recommended    | Limits failure-mode energy per cap
+| Freewheel diode         | Vishay VS-VSKT160-12 (or equivalent 1200 V / 160 A class stud rectifier) | Reverse-polarity protection across bank; cathode to bank+, anode to bank-; mounted on small finned heatsink near negative bus bar. Standard recovery is sufficient (not a high-frequency switching role)
+| Per-cap fusing          | Mersen A50QS80-4 (80 A continuous, 500 V DC, semiconductor-protection class) | Limits failure-mode energy per cap on internal short. Sized for ~4,500 A²·s per-shot pulse i²t with ~30% margin against fuse pre-arc rating. Verify actual per-cap pulse i²t on first commissioning shot with clip-on probe; can downsize to A50QS50-4 if margin proves generous. **Do NOT use ordinary fast-blow fuses** (Bussmann KTK, Littelfuse KLK class) — their pre-arc i²t is far too low for the 300 A discharge pulse and they will clear on the first shot
 | Bank thermistor         | Abort at 40 °C | Catches ESR-driven heating runaway; threshold lowered from 50 °C for earlier warning
 |===
 
 CAUTION: Bleed alone takes ~1.8 hours to drop the bank to <50 V. *Always* trigger the dump-bleed path (~750 ms) before service.
+
+=== Pulse Life and Service Expectations
+
+The ALS70 series is a high-CV screw-terminal aluminum electrolytic family designed for **continuous-ripple-current service** — frequency converters, UPS systems, switch-mode power supplies. Pulse-discharge service like FJH is *not* the family's design target.
+
+The datasheet's 20,000-hour endurance rating at 85 °C is an Arrhenius-governed *time-dependent* life metric for AC ripple at rated voltage. It does not characterize pulse-life in shot count.
+
+==== Pulse-life mechanisms
+
+Two independent aging paths drive failure under FJH duty:
+
+* **Per-time thermal aging** (Arrhenius). Driven by core temperature. At this rig's 30 s cycle and 1 Ω sample load, per-cap power dissipation is ~0.031 W → core temperature rise of ~0.4 K above ambient. *Deep in the no-aging-acceleration regime* — time-dependent life approaches the full datasheet 20,000 hr figure.
+* **Per-shot electrochemical and mechanical wear**. Each deep-discharge cycle (400 V → ~0 V → 400 V) stresses the anodic oxide layer. Each kA-class peak current loads the foil-to-tab welds with magnetic body force and i²R heating. Both accumulate per shot regardless of time between shots.
+
+The shot-count failure path is the binding constraint, not thermal aging.
+
+==== Realistic pulse life
+
+Published pulse-life data for this specific family in deep-discharge service does not exist (the manufacturer does not characterize it). Estimate from related work on aluminum electrolytic capacitors in capacitor-discharge applications:
+
+[cols="2,1,3", options="header"]
+|===
+| Capacitor class | Realistic pulse life | Notes
+
+| General-purpose Al electrolytic (this family — ALS70)   | 20,000–50,000 shots | Lower bound conservative; depends on V_final / V_initial ratio and per-cap stress
+| Pulse-rated Al electrolytic (Vishay 159 PUL-SI, CDE 947D) | 100,000–1,000,000 shots | Designed for capacitor-discharge service
+| Film cap (polypropylene, e.g., CDE 942C) | 1,000,000+ shots | Substantially higher cost per kJ stored
+|===
+
+At 30 s cycle, 20,000 shots ≈ 170 hours of operation; 50,000 shots ≈ 420 hours. Plan to evaluate bank condition at the 20,000-shot point and budget for replacement somewhere in that range.
+
+==== Failure-mode indicators
+
+End-of-life manifests as one of:
+
+* **ESR climb** — most common; per-cap ESR rises gradually from ~13 mΩ baseline, eventually reaching 2–3× initial. Detectable with milliohmmeter readings on individual caps.
+* **Capacitance drop** — slower mechanism; deep oxide wear reduces effective capacitance. Detectable by measuring V_MON time constant against bleed resistor.
+* **Sudden ESR spike** — internal weld fatigue causing intermittent connection. Manifests as low peak current on individual shots with no visible warning.
+* **Vent operation** — catastrophic; cap relieves pressure through the vent. Per-cap fusing (see support components table) limits damage to the failed unit.
+
+==== Monitoring protocol
+
+. **Per-cap ESR baseline** — measure ESR of each cap with a milliohmmeter (e.g., DER EE DE-5000 or equivalent LCR meter) at installation. Record in a spreadsheet keyed to cap can serial numbers / position in the bank.
+. **Periodic ESR check** — re-measure every ~5,000 shots or at major service intervals (cable replacement, electrode swap). Compare against baseline.
+. **Threshold for replacement**:
+** Individual cap ESR > 2× baseline → replace that cap
+** Bank average ESR > 1.5× baseline → schedule full-bank replacement
+** Bank thermistor reaching 40 °C abort during operation → unscheduled inspection (single bad cap likely)
+. **Visual inspection** every cap swap or thermal abort — look for bulged cans, electrolyte residue at vent, terminal discoloration.
+
+==== Upgrade path
+
+If pulse-life becomes operationally limiting (replacements every 6 months rather than every 2 years), the upgrade path is pulse-rated capacitors. Vishay 159 PUL-SI and CDE 947D series are the leading candidates. Tracked as `FUTURE-FILM-CAPS` in `data/pending.yaml`.
+
+This upgrade is *not* required for first-build operation — the ALS70 bank is functional and economically reasonable for development and characterization work. The upgrade decision should be driven by realized shot rate, not preemptively.

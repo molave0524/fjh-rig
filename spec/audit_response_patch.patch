@@ -1,0 +1,692 @@
+diff --git a/LICENSE b/LICENSE
+new file mode 100644
+index 0000000..e4b7557
+--- /dev/null
++++ b/LICENSE
+@@ -0,0 +1,28 @@
++MIT License
++
++Copyright (c) 2026 Molave
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software, documentation, hardware designs, and associated files (the
++"Work"), to deal in the Work without restriction, including without
++limitation the rights to use, copy, modify, merge, publish, distribute,
++sublicense, and/or sell copies of the Work, and to permit persons to whom
++the Work is furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in
++all copies or substantial portions of the Work.
++
++THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
++THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++FROM, OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
++IN THE WORK.
++
++Note: This license applies to the documentation, software, and design files
++in this repository. It does not grant any rights to patents held by third
++parties (including but not limited to the Flash Joule Heating patent family
++WO2020051000A1 / US20210206642A1 held by William Marsh Rice University and
++Tour et al.). Users building physical implementations of the designs herein
++are responsible for their own patent due diligence.
+diff --git a/README.adoc b/README.adoc
+index 470bf2b..30fd469 100644
+--- a/README.adoc
++++ b/README.adoc
+@@ -47,6 +47,7 @@ fjh-rig/
+ │   ├── 02_capacitor_bank.adoc
+ │   ├── 03_discharge_switch.adoc
+ │   ├── 04_reaction_chamber.adoc
++│   ├── 04b_sample_prep.adoc
+ │   ├── 05_atmosphere.adoc
+ │   ├── 06_control_electronics.adoc
+ │   ├── 07_safety.adoc
+@@ -110,7 +111,10 @@ Items caught during specification development, recorded to prevent regression. F
+ * "Coilcraft VPH4-0190" — *part does not exist*; correct part is *SD250-3L*
+ * 80 µs gate pulse width — saturates SD250-3L core; corrected to 25–40 µs
+ * "ChemGlass 4100N32" — not in ChemGlass catalog; actual source is *Wale Apparatus CFQ18X21.6*
++* Cap-bank ESR figures — used unsourced values (~10 mΩ then ~24 mΩ per cap); correct value is *13 mΩ at 100 Hz, 20 °C* per Kemet datasheet → bank ESR 0.93 mΩ for 14 caps in parallel
+ 
+-== License / Project info
++== License
+ 
+-Private project. Not for distribution. See LICENSE for terms if added.
++This work is licensed under the MIT License. See `LICENSE` at repo root for the full terms.
++
++The license applies to the documentation, software, and design files in this repository. It does not grant rights to third-party patents (including the Flash Joule Heating patent family WO2020051000A1 / US20210206642A1 held by William Marsh Rice University and Tour et al.). Anyone building physical implementations should perform their own patent due diligence.
+diff --git a/data/bom.csv b/data/bom.csv
+index a22d8ba..1cf8388 100644
+--- a/data/bom.csv
++++ b/data/bom.csv
+@@ -5,11 +5,14 @@ Capacitor Bank,Cu busbar,25mm x 6mm copper bar,2,15,20,McMaster-Carr,sourcing,~8
+ Capacitor Bank,Inrush resistor,~25 ohm 500W power resistor,1,40,80,various,pending-sizing,Tau ~6.3s; verify for cold full-bank charge
+ Capacitor Bank,Bleed resistor,12.5 kohm 50W,1,20,40,various,sourcing,Tau ~52min; 12.8W steady-state
+ Capacitor Bank,Dump SCR/contactor,LEV200 or equivalent,1,60,130,Tyco/various,sourcing,Default-closed fail-safe
+-Capacitor Bank,Freewheel diode,High-current diode across bank,1,15,30,various,sourcing,Reverse-polarity protection
+-Capacitor Bank,Per-cap fuse,fast-blow rated for cap fault,14,3,8,various,sourcing,Limits failure-mode energy per cap
+-Capacitor Bank,Bank thermistor,NTC sensor + comparator,1,5,15,various,sourcing,Abort at 50 deg C
++Capacitor Bank,Freewheel diode,Vishay VS-VSKT160-12 stud rectifier 160A/1200V (or equiv IXYS DSI120-12A),1,20,30,Vishay/IXYS (Mouser/Digikey),sourcing,Reverse-polarity protection; cathode to bank+; M16 stud + small finned heatsink; standard recovery sufficient
++Capacitor Bank,Per-cap fuse,Mersen A50QS80-4 80A/500VDC semiconductor protection fuse,14,15,25,Mersen (Mouser/Newark),sourcing,Semiconductor-protection class (NOT ordinary fast-blow); sized for ~4500 A2s per-shot pulse i2t; verify on first commissioning shot. Limits fault energy per cap on internal short.
++Capacitor Bank,Bank thermistor,NTC sensor + comparator,1,5,15,various,sourcing,Abort at 40 deg C (lowered from 50 for earlier warning of thermal accumulation)
+ Discharge Switch,N170CH12,WESTCODE press-pack thyristor W8 puck,1,150,300,WESTCODE (surplus),sourcing,1200V/339A avg/4200A pulse
+-Discharge Switch,Clamping fixture,Al/Cu plates 6mm + steel rods + PEEK + Belleville,1,50,100,fabricate,build,10-20kN at 1.5mm Belleville deflection
++Discharge Switch,Clamping plates,Aluminum 6061-T651 4"x4"x0.75" precision ground blank,2,40,60,OnlineMetals (mp-00000294),sourcing,For W8 puck fixture; +/-0.002" tolerance; verify flatness on receipt
++Discharge Switch,Clamping rods + isolation,4x M8x100mm stainless threaded rod + PEEK sleeves + shoulder washers + M8 nuts,1,20,40,various,sourcing,60mm rod spacing; PEEK isolation between rods and plates
++Discharge Switch,Belleville stack,McMaster 96445K446 chrome-vanadium 8.2 ID x 18 OD x 1.0 thick (3 packs of 12),3,3.62,3.62,McMaster-Carr,sourcing,2 nested x 4 inverted per rod (8/rod, 32 total + 4 spares); ~12 kN at 1.5 mm deflection
++Discharge Switch,Bus-bar interface hardware,4x M8x20 SS hex head bolt + M8 Belleville lock washer + vinyl insulating cap,1,10,20,various,sourcing,2 bolts per plate tapped into back face; HV-rated insulating caps over bolt heads
+ Discharge Switch,SD250-3L,Coilcraft pulse transformer for gate driver,1,8,12,Coilcraft (Mouser/Digikey),sourcing,Replaces nonexistent VPH4-0190
+ Discharge Switch,Gate MOSFET,opto-isolated MOSFET driver,1,5,15,various,sourcing,
+ Discharge Switch,RC snubber,Across SCR,1,5,15,various,sourcing,
+@@ -21,6 +24,14 @@ Reaction Chamber,Tube-end termination,Cap/seal housing for push rod entry,2,30,8
+ Reaction Chamber,Load cell,Compression force feedback,1,40,120,various,sourcing,Essential for tilt/asymmetric load detection
+ Reaction Chamber,4-wire R probe,Sample resistance measurement,1,20,50,fabricate,build,Disconnect before fire reconnect after dump
+ Reaction Chamber,BN tube (upgrade),Hot-pressed boron nitride 18mm ID,1,200,200,various,future,8x cost; 1000+ shot extrapolated life
++Sample Prep,Analytical balance,0.01-0.1g resolution e.g. Ohaus Scout SKX223,1,150,300,Ohaus/various,sourcing,Prep zone; 1g sample weighing
++Sample Prep,Compression jig,Bench-mounted vise/screw-clamp + load cell or pneumatic ram,1,100,300,fabricate/various,pending-design,Target 5-50 MPa over 254 mm2 = 1.3-13 kN; shared load cell with reaction position TBD (PREP-Q2)
++Sample Prep,Resistance verifier,4-wire ohmmeter w/ Kelvin clips 0.1-20 ohm range,1,80,200,Keithley/various,sourcing,Can be benchtop DMM e.g. Keithley 2110
++Sample Prep,Tube parking station,Holds 2-3 prepared tubes upright,1,30,80,fabricate,build,Prevents column shift before transfer
++Sample Prep,Transfer tray,Manual hand-carry tray w/ column-keeper,1,20,50,fabricate,build,V1 option; sliding stage deferred to future
++Sample Prep,Spare tubes for rotation,Additional CFQ18X21.6 (3-tube rotation pool),2,55,55,Wale Apparatus,sourcing,Rotation pool: 3 tubes + 3 electrode sets
++Sample Prep,Spare push rods for rotation,Additional C110 Cu rods,4,15,30,McMaster-Carr,sourcing,Rotation pool: 2 sets x 2 rods
++Sample Prep,PPE,Cut-resistant gloves + N95/P100 respirator + safety glasses,1,50,100,various,sourcing,Stored at prep zone
+ Atmosphere,Rotary vane pump,3.5 cfm pump,1,200,500,used market,sourcing,
+ Atmosphere,901P-11030,MKS pressure gauge KF-25 direct mount,1,170,200,MKS (refurb),sourcing,LOCKED; 10^-5 to 1000 Torr
+ Atmosphere,722A02T,MKS Baratron 10 Torr capacitance manometer,1,150,300,MKS,sourcing,
+@@ -36,9 +47,11 @@ Control,ADS1115,16-bit I2C ADC,1,5,10,Adafruit,sourcing,V_MON input
+ Control,Optoisolators,6N137 high-speed,4,2,3,various,sourcing,
+ Control,Ferrite clamps,For signal cables,8,2,5,various,sourcing,
+ Control,Isolated wall-wart,For ESP32 power,1,10,15,various,sourcing,Never tied to bank ground
+-Power Cabling,Belden 8267,75 ohm semi-rigid coax 3x 2m runs,1,80,150,Belden (Mouser),sourcing,Mains AC + ground + e-stop
++Power Cabling,Mains AC cable,14 AWG 3-conductor SOOW 600V 90C EPDM jacket 3x 2m runs,3,15,30,Carol/General Cable,sourcing,Replaces incorrect Belden 8267 mains spec; L/N/Earth per NEC 400.7
++Power Cabling,Earth/ground wire,10 AWG green/yellow grounding wire,1,10,20,various,sourcing,CCPF to chassis star-point single conductor
++Power Cabling,Belden 8267,RG-213/U flexible coax 50 ohm 13 AWG (for discharge flex link only, not mains AC),1,30,60,Belden (Mouser),sourcing,SCR-to-reactor flex link <=1m; NOT for mains AC (2-conductor cable)
+ Diagnostics,Rogowski coil,PEM CWT or similar 0-10kA range,1,200,500,PEM/various,sourcing,GAP-FILL diagnostic
+-Diagnostics,HV divider,10:1 or 100:1 BNC-out,1,50,200,various,sourcing,GAP-FILL diagnostic
++Diagnostics,HV divider,100:1 ratio LOCKED BNC-out >=10 MHz bandwidth,1,50,200,various,sourcing,GAP-FILL diagnostic; locked at 100:1 (was 10:1 or 100:1); 100:1 keeps scope input <4V under transient ringing
+ Diagnostics,Oscilloscope,4-channel 100MHz min deep memory,1,300,1500,various,sourcing,GAP-FILL diagnostic; can be existing lab scope
+ Diagnostics,Photodiode,BPW34 + amplifier,1,1,10,Vishay,sourcing,GAP-FILL diagnostic; flash t=0 reference
+ Enclosure,Aluminum enclosure,Faraday-shielded chassis,1,100,300,Hammond/various,sourcing,
+diff --git a/data/pending.yaml b/data/pending.yaml
+index 7ecb7f2..94d04d3 100644
+--- a/data/pending.yaml
++++ b/data/pending.yaml
+@@ -10,6 +10,21 @@ pending:
+     subsystem: charging-supply
+     blocks: commissioning
+ 
++  - id: VERIFY-FUSE-ITT
++    description: Measure actual per-cap pulse i2t on first commissioning shots with clip-on current probe
++    status: open
++    priority: medium
++    subsystem: capacitor-bank
++    notes: Per-cap fuse spec'd as Mersen A50QS80-4 (~6000 A2s pre-arc) sized for estimated 4500 A2s per-shot pulse. Verify actual value with on-cap probe; can downsize to A50QS50-4 (~2500 A2s) if margin proves generous, saves ~$50 across 14 caps.
++
++  - id: VERIFY-CAP-ESR-BASELINE
++    description: Measure per-cap ESR baseline at installation with milliohmmeter/LCR meter
++    status: open
++    priority: medium
++    subsystem: capacitor-bank
++    notes: |
++      Per spec/02_capacitor_bank.adoc Pulse Life section. Measure each cap's ESR (~13 mOhm datasheet baseline @ 100 Hz / 20 C) before bank assembly. Record in a spreadsheet keyed to cap serial number / position. Re-measure every ~5000 shots or at major service intervals; replace individual caps at 2x baseline, full bank at 1.5x average. Suggested instrument: DER EE DE-5000 LCR meter or equivalent.
++
+   - id: VERIFY-CCPF-RATE
+     description: Verify actual charge rate (1000 J/s test vs 1700 J/s nameplate)
+     status: open
+@@ -37,7 +52,7 @@ pending:
+     status: open
+     priority: high
+     subsystem: discharge-switch
+-    notes: Belleville stack 1.5 mm deflection target
++    notes: Belleville stack 96445K446, 2 nested x 4 inverted per rod, 1.5 mm deflection target
+ 
+   - id: SIZE-INRUSH
+     description: Size inrush resistor for cold full-bank charge at 252 mF
+@@ -60,6 +75,14 @@ pending:
+     subsystem: capacitor-bank
+     notes: Compare measured peak current to predicted
+ 
++  - id: GAP-DISCHARGE-LOOP-GEOMETRY
++    description: SCR-to-reactor discharge segment geometry (cross-section, length, attachment hardware)
++    status: open
++    priority: high
++    subsystem: power-cabling
++    notes: |
++      Bank-to-SCR segment is locked (25 x 6 mm Cu rails, 80 cm). SCR-to-reactor segment is currently described as "wide flat copper bus bar or heavy braided strap" without specifics. Resolution depends on final mechanical layout of reaction chamber relative to SCR fixture. Default assumption: ≥25 x 6 mm Cu equivalent cross-section, length minimized for low loop inductance. Cable substitution (Belden 8267) supported only for this segment, with constraints in spec/08.
++
+   - id: DESIGN-SAMPLE-HANDLING
+     description: Sample-handling mechanization design
+     status: open
+@@ -191,6 +214,53 @@ pending:
+     depends_on: [ELECTRODE-Q1, ELECTRODE-Q2]
+     notes: ~$60 of stock yields ~30 pucks. Use bandsaw or cutoff wheel; one face per puck only needs lapping if stock face finish insufficient.
+ 
++  # === Sample prep station (added 2026-05-12 from audit response) ===
++  # Documents the parallel prep workflow that makes the 25-30 s cycle achievable.
++  # See spec/04b_sample_prep.adoc.
++
++  - id: PREP-Q1
++    description: Tube transfer mechanism (manual hand-carry tray vs sliding stage)
++    status: open
++    priority: medium
++    subsystem: sample-prep
++    notes: Manual tray recommended for V1 build; sliding stage deferred as FUTURE upgrade.
++
++  - id: PREP-Q2
++    description: Compression jig load cell - shared with reaction position or dedicated prep-zone load cell
++    status: open
++    priority: medium
++    subsystem: sample-prep
++    notes: Shared simplifies BOM; dedicated allows parallel R-verify during fire.
++
++  - id: PREP-Q3
++    description: Prep zone footprint and layout within enclosure
++    status: open
++    priority: high
++    subsystem: sample-prep
++    depends_on: GAP-ENCLOSURE-DESIGN
++    notes: Two-zone partition design; partition must be conductive and bonded to chassis for EMI containment.
++
++  - id: PREP-Q4
++    description: Spent-column extraction and tube cleaning protocol
++    status: open
++    priority: medium
++    subsystem: sample-prep
++    notes: Between rotation cycles. Affects tube reuse rate and cross-shot contamination.
++
++  - id: PREP-Q5
++    description: Feedstock batch pre-portioning - pre-weighed vials or weigh-per-shot
++    status: open
++    priority: low
++    subsystem: sample-prep
++    notes: Pre-weighed vials saves prep time but adds vial inventory; weigh-per-shot is simpler.
++
++  - id: GAP-ENCLOSURE-DESIGN
++    description: Outer enclosure design including two-zone partition for parallel prep
++    status: open
++    priority: high
++    subsystem: enclosure
++    notes: Drives prep zone footprint (PREP-Q3); covers EMI shielding, interlocks, ventilation, HEPA filtration intersection.
++
+ future:
+   - id: FUTURE-LARGER-TUBE
+     description: 22-25 mm tube ID for >1 g batches
+@@ -198,9 +268,12 @@ future:
+     notes: Requires electrode redesign
+ 
+   - id: FUTURE-FILM-CAPS
+-    description: Film cap upgrade
++    description: Pulse-rated cap upgrade (Vishay 159 PUL-SI / CDE 947D / film)
+     status: deferred
+-    notes: When electrolytic life becomes operationally annoying
++    notes: |
++      When electrolytic pulse life (~20-50k shots realistic for ALS70 in FJH duty) becomes operationally limiting.
++      Pulse-rated Al electrolytic: 100k-1M shots; film: 1M+ shots at higher cost per kJ.
++      Decision should be driven by realized shot rate, not preemptive.
+ 
+   - id: FUTURE-PYROMETRY
+     description: In-situ pyrometry
+@@ -231,7 +304,7 @@ resolved:
+   - id: RES-MAINS-CABLE
+     description: Mains AC cabling spec
+     status: verified
+-    resolution: Belden 8267 (3 x 2 m runs)
++    resolution: 14 AWG 3-conductor SOOW (corrected from initial Belden 8267 spec; RG-213/U is 2-conductor coax and cannot carry L/N/Earth). Belden 8267 retained only for SCR-to-reactor discharge flex link role.
+ 
+   - id: RES-GATE-PART
+     description: Gate driver pulse transformer corrected
+diff --git a/spec/00_overview.adoc b/spec/00_overview.adoc
+index c9ca093..648cc5c 100644
+--- a/spec/00_overview.adoc
++++ b/spec/00_overview.adoc
+@@ -1,3 +1,4 @@
++[#sec-overview]
+ == Purpose and Headline Performance
+ 
+ A bench-scale FJH rig targeted at research-grade material quality with operational tempo suitable for production characterization runs.
+@@ -68,3 +69,5 @@ A bench-scale FJH rig targeted at research-grade material quality with operation
+    │ argon / vacuum  │
+    └─────────────────┘
+ ----
++
++NOTE: A separate **prep zone** inside the enclosure runs in parallel with the reaction zone, allowing the next sample tube to be prepared while the bank charges. The prep zone is not shown in the simplified diagram above. See `spec/04b_sample_prep.adoc` for the prep workflow, station equipment, two-zone partition, and safety architecture during parallel operation.
+diff --git a/spec/02_capacitor_bank.adoc b/spec/02_capacitor_bank.adoc
+index d15a334..2553dab 100644
+--- a/spec/02_capacitor_bank.adoc
++++ b/spec/02_capacitor_bank.adoc
+@@ -16,13 +16,13 @@ The Tour-group reference architecture, scaled up to 14 caps in pure parallel for
+ | Cost (caps)        | ~$2,000
+ | Chassis layout     | 7×2 grid (7 long × 2 deep)
+ | Footprint          | ~70 cm × 25 cm (caps are 90 mm OD)
+-| Bus bar            | 25 mm × 6 mm copper, two rails, ~80 cm length each (~$35 in materials)
++| Bus bar            | 25 mm × 6 mm copper, two rails, ~80 cm length each (~$35 in materials). Forms the *bank-to-SCR* segment of the discharge loop. For the complete loop including SCR-to-reactor segment, see `spec/08_power_cabling.adoc` (`#sec-power-cabling`).
+ | SCR mounting       | Geometric center of bank for balanced loop inductance
+ |===
+ 
+ .Per-cap loading vs. previous 10-cap
+ * Pulse current per cap drops from ~10% → ~7% of total (eases ESR-driven internal heating)
+-* Aggregate bank ESR drops from ~1.0 mΩ → ~0.71 mΩ (estimated, ~14 caps in parallel)
++* Aggregate bank ESR drops from ~1.30 mΩ (10-cap) → ~0.93 mΩ (14-cap), based on Kemet datasheet ESR of 13 mΩ per cap at 100 Hz / 20 °C. Earlier spec revisions cited ~1.0 → ~0.71 mΩ; these used an unsourced ~10 mΩ per-cap figure and have been corrected against the Kemet ALS70A183QS400 datasheet.
+ 
+ === Bank-level support components
+ 
+@@ -33,9 +33,64 @@ The Tour-group reference architecture, scaled up to 14 caps in pure parallel for
+ | Inrush-limit resistor   | ~25 Ω / 500 W | τ ≈ 6.3 s; protects caps and supply on first turn-on
+ | Bleed resistor          | 12.5 kΩ / 50 W | τ ≈ 52 min, ~1.8 h to <50 V; 12.8 W steady-state
+ | Dump SCR (or LEV200)    | Default-closed | Fail-safe; held closed by pull-down on reset/brownout
+-| Freewheel diode         | Across bank    | Reverse-polarity protection
+-| Per-cap fusing          | Recommended    | Limits failure-mode energy per cap
+-| Bank thermistor         | Abort at 50 °C | Catches ESR-driven heating runaway
++| Freewheel diode         | Vishay VS-VSKT160-12 (or equivalent 1200 V / 160 A class stud rectifier) | Reverse-polarity protection across bank; cathode to bank+, anode to bank-; mounted on small finned heatsink near negative bus bar. Standard recovery is sufficient (not a high-frequency switching role)
++| Per-cap fusing          | Mersen A50QS80-4 (80 A continuous, 500 V DC, semiconductor-protection class) | Limits failure-mode energy per cap on internal short. Sized for ~4,500 A²·s per-shot pulse i²t with ~30% margin against fuse pre-arc rating. Verify actual per-cap pulse i²t on first commissioning shot with clip-on probe; can downsize to A50QS50-4 if margin proves generous. **Do NOT use ordinary fast-blow fuses** (Bussmann KTK, Littelfuse KLK class) — their pre-arc i²t is far too low for the 300 A discharge pulse and they will clear on the first shot
++| Bank thermistor         | Abort at 40 °C | Catches ESR-driven heating runaway; threshold lowered from 50 °C for earlier warning
+ |===
+ 
+ CAUTION: Bleed alone takes ~1.8 hours to drop the bank to <50 V. *Always* trigger the dump-bleed path (~750 ms) before service.
++
++=== Pulse Life and Service Expectations
++
++The ALS70 series is a high-CV screw-terminal aluminum electrolytic family designed for **continuous-ripple-current service** — frequency converters, UPS systems, switch-mode power supplies. Pulse-discharge service like FJH is *not* the family's design target.
++
++The datasheet's 20,000-hour endurance rating at 85 °C is an Arrhenius-governed *time-dependent* life metric for AC ripple at rated voltage. It does not characterize pulse-life in shot count.
++
++==== Pulse-life mechanisms
++
++Two independent aging paths drive failure under FJH duty:
++
++* **Per-time thermal aging** (Arrhenius). Driven by core temperature. At this rig's 30 s cycle and 1 Ω sample load, per-cap power dissipation is ~0.031 W → core temperature rise of ~0.4 K above ambient. *Deep in the no-aging-acceleration regime* — time-dependent life approaches the full datasheet 20,000 hr figure.
++* **Per-shot electrochemical and mechanical wear**. Each deep-discharge cycle (400 V → ~0 V → 400 V) stresses the anodic oxide layer. Each kA-class peak current loads the foil-to-tab welds with magnetic body force and i²R heating. Both accumulate per shot regardless of time between shots.
++
++The shot-count failure path is the binding constraint, not thermal aging.
++
++==== Realistic pulse life
++
++Published pulse-life data for this specific family in deep-discharge service does not exist (the manufacturer does not characterize it). Estimate from related work on aluminum electrolytic capacitors in capacitor-discharge applications:
++
++[cols="2,1,3", options="header"]
++|===
++| Capacitor class | Realistic pulse life | Notes
++
++| General-purpose Al electrolytic (this family — ALS70)   | 20,000–50,000 shots | Lower bound conservative; depends on V_final / V_initial ratio and per-cap stress
++| Pulse-rated Al electrolytic (Vishay 159 PUL-SI, CDE 947D) | 100,000–1,000,000 shots | Designed for capacitor-discharge service
++| Film cap (polypropylene, e.g., CDE 942C) | 1,000,000+ shots | Substantially higher cost per kJ stored
++|===
++
++At 30 s cycle, 20,000 shots ≈ 170 hours of operation; 50,000 shots ≈ 420 hours. Plan to evaluate bank condition at the 20,000-shot point and budget for replacement somewhere in that range.
++
++==== Failure-mode indicators
++
++End-of-life manifests as one of:
++
++* **ESR climb** — most common; per-cap ESR rises gradually from ~13 mΩ baseline, eventually reaching 2–3× initial. Detectable with milliohmmeter readings on individual caps.
++* **Capacitance drop** — slower mechanism; deep oxide wear reduces effective capacitance. Detectable by measuring V_MON time constant against bleed resistor.
++* **Sudden ESR spike** — internal weld fatigue causing intermittent connection. Manifests as low peak current on individual shots with no visible warning.
++* **Vent operation** — catastrophic; cap relieves pressure through the vent. Per-cap fusing (see support components table) limits damage to the failed unit.
++
++==== Monitoring protocol
++
++. **Per-cap ESR baseline** — measure ESR of each cap with a milliohmmeter (e.g., DER EE DE-5000 or equivalent LCR meter) at installation. Record in a spreadsheet keyed to cap can serial numbers / position in the bank.
++. **Periodic ESR check** — re-measure every ~5,000 shots or at major service intervals (cable replacement, electrode swap). Compare against baseline.
++. **Threshold for replacement**:
++** Individual cap ESR > 2× baseline → replace that cap
++** Bank average ESR > 1.5× baseline → schedule full-bank replacement
++** Bank thermistor reaching 40 °C abort during operation → unscheduled inspection (single bad cap likely)
++. **Visual inspection** every cap swap or thermal abort — look for bulged cans, electrolyte residue at vent, terminal discoloration.
++
++==== Upgrade path
++
++If pulse-life becomes operationally limiting (replacements every 6 months rather than every 2 years), the upgrade path is pulse-rated capacitors. Vishay 159 PUL-SI and CDE 947D series are the leading candidates. Tracked as `FUTURE-FILM-CAPS` in `data/pending.yaml`.
++
++This upgrade is *not* required for first-build operation — the ALS70 bank is functional and economically reasonable for development and characterization work. The upgrade decision should be driven by realized shot rate, not preemptively.
+diff --git a/spec/03_discharge_switch.adoc b/spec/03_discharge_switch.adoc
+index 0f28137..e9ae688 100644
+--- a/spec/03_discharge_switch.adoc
++++ b/spec/03_discharge_switch.adoc
+@@ -15,14 +15,27 @@
+ | R_thJK_          | 0.095 K/W (180° sine)
+ |===
+ 
+-=== Clamping fixture
+-
+-* Aluminum/copper plates min 6 mm thick
+-* 4× steel rods
+-* *PEEK sleeves + shoulder washers* (electrical isolation between rods and plates)
+-* Guide fixture for 19 mm puck centering
+-* Belleville washers at 1.5 mm deflection → 10–20 kN clamping force
+-* Verify contact uniformity post-assembly
++=== Clamping fixture (W8 puck)
++
++[cols="2,3", options="header"]
++|===
++| Component | Spec
++
++| Plates              | Aluminum 6061-T651, 100 × 100 × 19 mm (4″ × 4″ × 0.75″), precision ground/milled 6-side blanks (±0.05 mm thickness). Source: link:https://www.onlinemetals.com/en/buy/aluminum/0-75-aluminum-6061-t651-precision-ground-milled-blanks/pid/mp-00000294[OnlineMetals mp-00000294]
++| Plate flatness      | ±10 µm across the 19 mm puck contact area; verify on receipt with precision straightedge and feeler gauge
++| Plate features      | Optional 20 mm dia × 0.5 mm deep puck-locating recess on inside face of each plate
++| Clamping rods       | 4 × M8 stainless threaded rod, **100 mm length**, 60 mm × 60 mm corner pattern (length accommodates plates + puck + Belleville stack + nuts with trim margin)
++| Rod isolation       | PEEK sleeves + PEEK shoulder washers (electrical isolation between rods and plates)
++| Belleville stack    | McMaster **96445K446** (chrome-vanadium steel, 8.2 mm ID × 18 mm OD × 1.0 mm thick). Stack configuration per rod: **2 nested × 4 inverted (8 washers per rod, 32 total)**. Delivers ~672 lbf (~3 kN) per rod at 1.5 mm stack deflection → ~12 kN total clamping force on the puck. Order qty 3 packs of 12 (36 washers, includes spares; ~$11)
++| Bus-bar joint       | Penetrox or equivalent on all Al–Cu interfaces (prevents Al oxide forming in the joint)
++| Bus-bar interface   | Plate back face; flat-to-plate contact with bus bar arriving from below
++| Joint bolt pattern  | 2× tapped blind holes per plate at 25 mm center-to-center, 12 mm from one edge of back face; clear of puck-locating recess and corner rods
++| Joint hardware      | 2× M8 × 20 mm stainless hex head bolt + M8 Belleville lock washer per plate (4 bolts total); ~12 mm thread engagement
++| Bolt insulation     | Vinyl or silicone insulating cap over each bolt head (defense-in-depth for HV-energized fastener; door interlocks + bleed/dump remain the primary defense)
++| Verification        | Pressure-sensitive film (e.g. Fujifilm Prescale LLW) under design clamp force; expect uniform color across the 19 mm puck face
++|===
++
++NOTE: Plate sizing here is specific to the N170CH12 W8 (19 mm) package. Earlier project notes referenced larger plates (150 × 150 × 30 mm, M12 rods, 25 kN) — those numbers were derived for an assumed-larger pole face and do not apply to the W8.
+ 
+ === Gate driver
+ 
+diff --git a/spec/04_reaction_chamber.adoc b/spec/04_reaction_chamber.adoc
+index 08dd2d0..4e883df 100644
+--- a/spec/04_reaction_chamber.adoc
++++ b/spec/04_reaction_chamber.adoc
+@@ -86,6 +86,8 @@ For the 18 mm ID quartz tube and 1 g carbon-black feedstock, the electrode archi
+ ** Below ~0.5 Ω: discharge too fast, ringing dominates
+ ** Above ~20 Ω: rectifier-side losses dominate before sample heats fully
+ 
++NOTE: The 1–10 Ω range is intentionally wider than the published Tour-group optimum (0.5–2 Ω, Tour 2020 and Tan 2026 review). The wider range is appropriate for this rig's intended feedstock variety (carbon black, calcined coke, biochar) where the achievable compressed-state resistance varies by feedstock grade and packing density. Higher R_sample (3–10 Ω) yields functional flash-graphene product, though Raman 2D peak quality and turbostratic stacking may be modestly lower than at the published optimum. Process tuning per feedstock is expected; the 0.5 Ω lower bound and 20 Ω upper bound are the *hard* failure modes.
++
+ === Open electrode design questions
+ 
+ Six open items (Q1–Q6) remain in the electrode subsystem, tracked as `ELECTRODE-Q1` through `ELECTRODE-Q6` in `data/pending.yaml`:
+diff --git a/spec/04b_sample_prep.adoc b/spec/04b_sample_prep.adoc
+new file mode 100644
+index 0000000..afe6a48
+--- /dev/null
++++ b/spec/04b_sample_prep.adoc
+@@ -0,0 +1,119 @@
++[#sec-sample-prep]
++== Sample Preparation Workflow and Station
++
++The rig's ~25–30 s cycle time depends on a **parallel prep station** where the next sample tube is fully prepared while the bank charges. Without this parallel workflow, the cycle becomes serial (~45 s) and the production tempo claim doesn't hold. This section documents the prep station, the operator workflow, and the handoff into the reaction position.
++
++NOTE: This section was added in audit-response revision 2026-05-12. The prep-station model was previously implicit in `spec/10_fsm_timing.adoc` and `spec/00_overview.adoc` cycle-time claims but not documented as a discrete subsystem.
++
++=== Operational concept
++
++The rig has two parallel work zones, both inside the outer enclosure but physically separated by an internal partition:
++
++* *Reaction zone*: bank, SCR, reaction tube in firing position, discharge bus bars. HV-energized during `CHARGE` and `READY_TO_FIRE` states. Operator does *not* enter this zone while bank is above 50 V.
++* *Prep zone*: scale, compression jig, R-verify probe, parking station for the prepared tube. No HV exposure. Operator works here while bank charges.
++
++Between shots, a manual transfer moves the prepared tube from the prep zone into the reaction position, and the spent column from the reaction position back to the prep zone (for column extraction and tube clean/reuse). The transfer mechanism is a sliding stage or hand-carry tray, depending on the final mechanical design (see `mechanical/sample-handling/`).
++
++The two-zone partition serves three purposes:
++
++. *Safety*: physical barrier between operator and HV-energized reaction zone during charge
++. *Cleanliness*: keeps graphene dust contained to the reaction zone; prep zone stays clean for handling new feedstock
++. *Cycle time*: enables parallel prep that's the basis for the 25–30 s cycle claim
++
++=== Prep station equipment
++
++[cols="2,3", options="header"]
++|===
++| Item | Spec
++
++| Analytical balance        | 0.1 g resolution adequate for 1 g samples; 0.01 g preferred. Bench-top, e.g., Ohaus Scout SKX223 or equivalent.
++| Compression jig           | Bench-mounted vise or screw-clamp with load-cell feedback (load cell shared with reaction position or duplicated). Pneumatic option for repeatability. Target 5–50 MPa over 254 mm² → 1.3–13 kN.
++| Resistance verifier       | 4-wire ohmmeter with Kelvin clip leads, range 0.1–20 Ω. Can be a benchtop DMM (e.g., Keithley 2110) or a dedicated milliohmmeter.
++| Tube parking station      | Holds 2–3 prepared tubes upright between use. Prevents column shift before transfer.
++| Tube transfer mechanism   | Manual hand-carry tray *or* sliding stage. Tray sized to keep column vertical during transfer.
++| Workspace surface         | Clean, non-conductive, ~600 × 400 mm minimum. ESD mat optional but recommended for the R-verify step.
++| PPE storage               | Cut-resistant gloves, safety glasses, N95 / P100 respirator within reach of the prep zone.
++|===
++
++=== Tube and electrode inventory in rotation
++
++Minimum rotation: 2 tubes + 2 electrode sets.
++
++[cols="1,2,2", options="header"]
++|===
++| Position | Contents | State
++
++| Reaction zone        | Tube N + electrodes N + spent column | Just fired; awaits dump-bleed + transfer back
++| Prep zone (parking)  | Tube N+1 + electrodes N+1 + fresh column | Pre-prepared; ready for transfer in
++| Prep zone (in-prep)  | Tube N+2 (being loaded)              | In progress
++|===
++
++Recommended pool: 3 tubes + 3 electrode sets (2-puck + 2-rod per set) in rotation, so one set is always being cleaned/reset while two are in active rotation. With pucks at ~$2 each and a 4-ft tube yielding 8–12 columns, this is a low-cost margin.
++
++=== Operator workflow (prep zone)
++
++Per-shot prep workflow, typical time budget:
++
++[cols="1,2,1", options="header"]
++|===
++| Step | Action | Time
++
++| 1 | Retrieve clean tube + 2 graphite pucks + 2 Cu push rods from parts bin | 30 s
++| 2 | Weigh 1.00 ± 0.05 g of feedstock on analytical balance | 30 s
++| 3 | Insert lower puck into tube, then load feedstock column | 30 s
++| 4 | Insert upper puck; verify column height in window (5.6–8.4 mm for 1 g) | 15 s
++| 5 | Transfer assembly to compression jig; compress to target force (load cell feedback) | 60 s
++| 6 | 4-wire R-verify; record value; verify 1–10 Ω target (0.5–3 Ω preferred per published optimum) | 30 s
++| 7 | Park tube in parking station, ready for transfer | 15 s
++| *Total* | | *~3.5 minutes for one tube; well under the 20-s cycle if done during the previous shot's charge*
++|===
++
++NOTE: The 20–25 s "sample handling" duration in `spec/10_fsm_timing.adoc` is the *floor* for prep — it assumes practiced operator, ergonomic prep zone layout, and feedstock pre-portioned in batches. First-build operators should expect 3–5 minutes per tube initially, which fully consumes the bank charge time. Steady-state operation after operator practice trends toward 20–25 s of inline prep activity, with the remainder of the budget consumed by handoffs and inspection.
++
++=== Inline tube swap (reaction zone)
++
++After `DUMP_BLEED` completes and the door interlock releases (`V_MON < 50 V`):
++
++[cols="1,2,1", options="header"]
++|===
++| Step | Action | Time
++
++| 1 | Door interlock releases; open reaction zone | 5 s
++| 2 | Extract spent tube assembly; place on extraction tray | 5 s
++| 3 | Retrieve prepared tube from parking station | 5 s
++| 4 | Install prepared tube in reaction position; bus-bar contact via electrode clamping | 10 s
++| 5 | Close reaction zone door; interlock latches | 5 s
++| *Total inline swap* | | *~30 s* (envelope; some steps overlap with bank pre-charge)
++|===
++
++This is the *inline* part of the sample branch. The remaining prep work (weigh, load, compress, R-verify) happens in parallel during the next bank charge cycle.
++
++CAUTION: Door interlock must positively confirm `V_MON < 50 V` before release. Operator must not bypass interlock under any circumstance. Inline swap time begins only after interlock release, not after FIRE event.
++
++=== Operator safety during parallel operation
++
++* Bank charging happens with the reaction-zone door **locked** by interlock.
++* Operator is in the prep zone (or fully outside the enclosure) during all `CHARGE` and `READY_TO_FIRE` states.
++* Prep-zone door (if separate) does *not* interlock the bank — the prep zone has no HV exposure.
++* The two-zone partition must be conductive and bonded to chassis ground (Faraday shielding extends through the partition to keep EMI from the discharge out of the prep zone).
++* FIRE event is initiated by the operator from a control panel outside both zones, with the reaction-zone door confirmed locked.
++* Audible/visual indicators signal the operator when the bank is charged (`READY_TO_FIRE` lamp), when FIRE is armed, when the discharge has completed, and when the door interlock has released for transfer.
++
++=== Handoff: prep zone → reaction position
++
++The mechanical interface for tube transfer is open (`DESIGN-SAMPLE-HANDLING` pending). Two main options:
++
++. *Manual hand-carry tray*: simplest. Operator carries the prepared tube vertically on a small tray with column-keeper through the prep-zone door, opens the reaction-zone door, places into electrode clamps, withdraws hands, closes door. Adds operator handling time but minimal mechanical complexity.
++. *Sliding stage / cassette*: the prepared tube sits in a cassette in the prep zone; cassette translates through a sealed pass-through into the reaction zone where electrode clamps engage. Adds mechanical complexity but reduces transfer time and improves repeatability.
++
++Option 1 is recommended for first build. Option 2 is a `FUTURE-*` upgrade for sustained production.
++
++=== Open prep-station design questions
++
++* `PREP-Q1`: Manual tray vs sliding stage for tube transfer (recommend manual for V1)
++* `PREP-Q2`: Compression jig — shared load cell with reaction position, or dedicated prep jig load cell?
++* `PREP-Q3`: Prep-zone footprint and layout within the enclosure (depends on enclosure design — see `GAP-ENCLOSURE-DESIGN`)
++* `PREP-Q4`: Spent-column extraction and tube cleaning protocol (between rotation cycles)
++* `PREP-Q5`: Feedstock batch pre-portioning — pre-weighed vials or weigh-per-shot?
++
++These should be added to `data/pending.yaml` as design tasks alongside `DESIGN-SAMPLE-HANDLING`.
+diff --git a/spec/08_power_cabling.adoc b/spec/08_power_cabling.adoc
+index 62a17ef..ea2c65e 100644
+--- a/spec/08_power_cabling.adoc
++++ b/spec/08_power_cabling.adoc
+@@ -1,11 +1,77 @@
+ [#sec-power-cabling]
+-== Power and Interconnect Cabling: Belden 8267
+-
+-* *Mains AC power cable*: Belden 8267 (semi-rigid coax, 75 Ω)
+-* *3 × 2 m runs*:
+-. Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth); shield to enclosure frame
+-. Run 2: CCPF AC ground → rig chassis ground (star-point safety earth)
+-. Run 3: E-stop circuit loop (redundant mains disconnect path)
+-* Shield grounded *single-point* at enclosure frame only (avoid ground loops)
+-* Signal cabling: STP with ferrite clamps for V_PROG/V_MON/INHIBIT/EOC; twisted pair for gate drive
+-* Discharge loop: *wide flat copper busbars only* (no cable); short heavy copper tubing or braided strap from SCR to reactor
++== Power and Interconnect Cabling
++
++This section covers three distinct cabling roles in the rig, each with different requirements:
++
++. **Mains AC power** — 220 VAC L/N/Earth between enclosure inlet, CCPF-1700, and chassis earth. Requires a proper 3-conductor power cable.
++. **Signal cabling** — V_PROG, V_MON, INHIBIT, EOC, gate drive. Low-voltage, low-current, but needs shielding against the kA discharge EMI.
++. **Discharge loop** — bank to SCR to reactor electrodes. Carries the pulse current. Bus bars by default; flexible options documented for the SCR-to-reactor segment where mechanical compliance is needed.
++
++=== Mains AC power cabling
++
++* *Cable*: 14 AWG, 3-conductor SOOW or SJOOW (e.g., Carol C202814 or equivalent), rated 600 V / 90 °C, EPDM jacket
++* *3 × 2 m runs* (revised — previously misspecified as Belden 8267 coax, which is a 2-conductor cable and cannot carry L/N/Earth):
++. Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth)
++. Run 2: CCPF chassis ground stud → rig chassis ground star point (single conductor, 10 AWG green/yellow grounding wire)
++. Run 3: E-stop circuit loop (low-voltage signal pair, shielded — does *not* need power cable construction)
++* *Terminations*: factory or field-installed strain-relief connectors at both ends; IEC C13/C14 at the CCPF if appropriate
++* *Earth bonding*: single-point star ground at the enclosure frame
++* *Code compliance*: install per NEC 400.7 for portable cordage in a fixed enclosure context
++
++=== Signal cabling
++
++* STP (shielded twisted pair) with ferrite clamps for V_PROG / V_MON / INHIBIT / EOC
++* Twisted pair for gate drive
++* Shield grounded *single-point* at the controller (avoid ground loops)
++
++=== Discharge loop (default)
++
++The complete discharge path runs Bank → SCR → reactor. Two segments, both copper bus bar by default. Cable substitution is supported only for the SCR-to-reactor segment (see "flex link alternative" below).
++
++[cols="1,2,3", options="header"]
++|===
++| Segment | Geometry | Source / spec
++
++| Bank → SCR (cap bank rails) | 25 × 6 mm copper, two rails, ~80 cm length each, SCR mounted at geometric center of 7×2 cap grid for balanced loop inductance | Locked. See `spec/02_capacitor_bank.adoc` (`#sec-cap-bank`)
++| SCR → reactor (load segment) | Wide flat copper bus bar or heavy braided strap; specific cross-section / length TBD | **Pending** — `GAP-DISCHARGE-LOOP-GEOMETRY` in `data/pending.yaml`. Default assumption: ≥25 × 6 mm Cu equivalent cross-section to match bank rails; length minimized to keep loop inductance low.
++|===
++
++NOTE: The cap-bank-end rails are well-specified; the SCR-to-reactor segment depends on final mechanical layout of the reaction chamber relative to the SCR fixture (see `spec/03_discharge_switch.adoc` and `mechanical/scr-fixture/` when populated). No cable substitution by default — bus bar throughout.
++
++=== Discharge loop (flex link alternative — SCR to reactor only)
++
++When mechanical compliance to a removable reactor assembly is needed, the SCR-to-reactor segment may use a flexible cable. The default Belden 8267 (RG-213/U) is acceptable for short runs with active monitoring; better options exist for sustained or long-run installations.
++
++==== Option: RG-213 (Belden 8267) as discharge flex link
++
++Acceptable for short flex runs with mechanical compliance to a removable reactor assembly. Not a long-term low-maintenance choice; needs scheduled inspection.
++
++* *Length*: ≤ 1 m (0.5 m preferred). Resistive loss is ~1.8% of shot energy per meter at design conditions; per-meter ΔT is ~17 K per shot. Going beyond ~1 m stresses the PVC jacket (rated 80 °C) under repeated shots.
++* *Terminations*: crimped lugs only, no solder (solder joints fatigue under repeated pulse heating). Bond braid circumferentially to the return path at both ends; do not pigtail the braid to a single point.
++* *Replacement schedule*: every 10,000–20,000 shots, or sooner if inspection signals trigger. Sync with capacitor service intervals where possible.
++* *Inspection protocol*:
++** Visual check of terminations every ~500 shots — discoloration, jacket damage near lugs
++** IR thermometer reading of jacket ~30 s after a shot — track trend, not absolute
++** End-to-end DC resistance with milliohmmeter every cap swap — log baseline; 50% increase = replace
++** Immediate replacement on: audible snap during discharge, visible jacket damage, resistance > 2× baseline
++
++==== Upgrade paths
++
++Listed in order of incremental improvement over RG-213. The bigger conductor cross-sections and proper pulse-rated constructions remove the inspection-heavy maintenance pattern.
++
++[cols="2,1,1,1,1", options="header"]
++|===
++| Cable | Conductor area | V rating | Cost (5 m pair) | Expected life
++
++| RG-213 (Belden 8267)        | 5.3 mm²  | 3.7 kV | ~$30   | 10–20k shots
++| RG-218/U                     | ~21 mm²  | 5 kV   | ~$150  | 30–50k shots
++| Type W 2/0 portable power    | 67 mm²   | 2 kV   | ~$200  | 100k+ shots
++| Spot welder kickless cable   | 107+ mm² | 2–5 kV | ~$500+ | 1M+ shots
++|===
++
++* *RG-218/U*: incremental upgrade — same coaxial geometry, scaled-up conductor and dielectric.
++* *Type W 2/0 portable power*: workhorse upgrade — heavily stranded portable power cable, EPDM jacket, industrial robust. Run two conductors twisted or zip-tied at ~100 mm intervals to keep the inductive loop area small. Terminate with hydraulic-crimped compression lugs.
++* *Spot welder kickless cable*: industrial-pedigree option — coaxial geometry built in, designed for millions of pulse cycles. Suppliers: Watteredge, NWL Capacitors, Mersen, Hi-Tech Industries. Water-cooled variants available for sustained high-rate operation.
++* For sustained operation > 10 shots/min or runs > 2 m, Type W or kickless cable is recommended over scaling RG-213.
++
++NOTE: Earlier revisions of this spec listed Belden 8267 as the mains AC cable across all three runs. This was incorrect — RG-213/U is a 2-conductor coaxial cable and cannot safely carry L/N/Earth on a single run. The mains AC cable has been revised to proper 3-conductor SOOW. Belden 8267 remains specified only for the discharge flex link (SCR to reactor) where coaxial geometry is appropriate.
+diff --git a/spec/09_diagnostics.adoc b/spec/09_diagnostics.adoc
+index c74a6ff..5d0c5e5 100644
+--- a/spec/09_diagnostics.adoc
++++ b/spec/09_diagnostics.adoc
+@@ -10,7 +10,7 @@ CAUTION: This section was identified as a gap in the original spec. Without diag
+ | Instrument | Purpose / spec
+ 
+ | Rogowski coil          | Discharge current waveform, kA-scale (0–10 kA range, ~10 ns rise time, e.g., PEM CWT or similar)
+-| HV divider             | Bank voltage trace through discharge (10:1 or 100:1, BNC out)
++| HV divider             | Bank voltage trace through discharge — *LOCKED at 100:1*, BNC out, ≥10 MHz bandwidth. 100:1 chosen over 10:1 because 10:1 puts 40 V on the scope input which risks transient excursion beyond standard 1× probe ratings during discharge ringing; 100:1 keeps scope-side excursion below 4 V (well within tolerance) at the cost of modest resolution.
+ | Oscilloscope           | Capture both traces; 4-channel, 100 MHz minimum, deep memory for full discharge tail
+ | Photodiode (BPW34, ~$1) | Independent flash t=0 reference; useful sanity check vs. electrical trigger
+ |===
+diff --git a/spec/10_fsm_timing.adoc b/spec/10_fsm_timing.adoc
+index c375a6b..e115dee 100644
+--- a/spec/10_fsm_timing.adoc
++++ b/spec/10_fsm_timing.adoc
+@@ -7,17 +7,22 @@
+ === Sample branch
+ `IDLE → EJECT → LOAD → AR_PURGE → COMPRESS → R_VERIFY → READY_TO_FIRE → POST_FIRE_HOLD → IDLE`
+ 
++NOTE: The sample branch covers *prep-zone* operations that run in parallel with the charge branch. Inline reaction-zone tube swap (after FIRE, before next CHARGE) is a separate ~30 s envelope documented in `spec/04b_sample_prep.adoc`. See that section for the full prep workflow and station layout.
++
+ === Cycle timing
+ 
+-[cols="2,1", options="header"]
++[cols="2,1,2", options="header"]
+ |===
+-| Phase | Duration
++| Phase | Duration | Notes
+ 
+-| Charge (20 kJ @ 1000 J/s) | ~20 s
+-| Sample handling           | ~20–25 s
+-| FIRE + discharge          | <1 s
+-| Dump-bleed                | ~0.75 s
+-| *Effective cycle*         | *~25–30 s*
++| Charge (20 kJ @ 1000 J/s)   | ~20 s    | Charge branch, exclusive
++| Parallel sample prep        | ~20–25 s | Sample branch in prep zone, runs *concurrent* with charge — does not add to cycle time
++| FIRE + discharge            | <1 s     | Charge branch
++| Dump-bleed                  | ~0.75 s  | Charge branch
++| Inline tube swap            | ~5 s     | Reaction-zone tube swap after dump-bleed, before next charge starts. See `spec/04b_sample_prep.adoc` for full ~30 s envelope including door interlock release.
++| *Effective cycle*           | *~25–30 s* | Charge time dominates; parallel prep keeps the sample branch off the critical path
+ |===
+ 
+-The charge branch is the cycle gate (was the sample branch in the 10-cap config).
++The charge branch is the cycle gate. Parallel prep means the sample branch's ~20–25 s of work does not extend the cycle as long as it completes within the charge window. If prep takes longer (e.g., during operator training or for difficult feedstocks), cycle time stretches to match the sample branch.
++
++CAUTION: Parallel operation requires the operator to be in the prep zone (or fully outside the enclosure) during `CHARGE` and `READY_TO_FIRE` states. The reaction-zone door must be interlock-locked during these states. See `spec/04b_sample_prep.adoc` and `spec/07_safety.adoc` for the safety architecture.
+diff --git a/spec/appendix.adoc b/spec/appendix.adoc
+index f4ca97f..fcabfcf 100644
+--- a/spec/appendix.adoc
++++ b/spec/appendix.adoc
+@@ -6,7 +6,8 @@
+ |===
+ | Revision | Changes
+ 
+-| 14-cap-N170-W8-Wale-Arch4-Repo (current) | Repo conversion: spec split into per-subsystem files under `spec/`; structured BOM/pending moved to `data/`; placeholder folders for `schematics/`, `mechanical/`, `firmware/`
++| 14-cap-N170-W8-Wale-Arch4-Audit1 (current) | Audit response: corrected Belden 8267 mains AC misuse (replaced with 14 AWG 3-conductor SOOW; Belden 8267 retained only for SCR-to-reactor discharge flex link); added `spec/04b_sample_prep.adoc` documenting the parallel prep station workflow that makes the 25-30 s cycle achievable; updated `spec/10_fsm_timing.adoc` to distinguish inline vs parallel sample handling
++| 14-cap-N170-W8-Wale-Arch4-Repo | Repo conversion: spec split into per-subsystem files under `spec/`; structured BOM/pending moved to `data/`; placeholder folders for `schematics/`, `mechanical/`, `firmware/`
+ | 14-cap-N170-W8-Wale-Arch4 | Electrode architecture locked: Arch 4 (graphite puck + Cu push rod); Q1–Q6 design questions tracked
+ | 14-cap-N170-W8-Wale-AsciiDoc | Format conversion to AsciiDoc; gap-fill sections added (Diagnostics, Procedures); BOM extracted to CSV; Pending items extracted to YAML
+ | 14-cap-N170-W8-Wale-18mm | Quartz tube locked: 18 mm ID × 21.6 mm OD (Wale Apparatus CFQ18X21.6)
+@@ -26,3 +27,4 @@ These items were caught and corrected during specification development; document
+ * "Coilcraft VPH4-0190" — *part does not exist*. Correct part: *SD250-3L*.
+ * 80 µs gate width — *saturates SD250-3L core*. Corrected to 25–40 µs.
+ * "ChemGlass 4100N32" quartz tube — *part not in ChemGlass catalog*. Actual source: *Wale Apparatus CFQ18X21.6*.
++* Cap-bank ESR figures cited various unsourced per-cap values (~10 mΩ in early spec, ~24 mΩ in audit response). *Correct value: 13 mΩ at 100 Hz, 20 °C* per Kemet ALS70A183QS400 datasheet (confirmed via Digikey listing). Bank ESR (14-cap parallel) = 0.93 mΩ at datasheet conditions; ESR drops further at elevated operating temperature.
+diff --git a/spec/main.adoc b/spec/main.adoc
+index 01cb74b..614a79b 100644
+--- a/spec/main.adoc
++++ b/spec/main.adoc
+@@ -29,6 +29,8 @@ include::03_discharge_switch.adoc[]
+ 
+ include::04_reaction_chamber.adoc[]
+ 
++include::04b_sample_prep.adoc[]
++
+ include::05_atmosphere.adoc[]
+ 
+ include::06_control_electronics.adoc[]

@@ -1,22 +1,50 @@
 [#sec-power-cabling]
-== Power and Interconnect Cabling: Belden 8267
+== Power and Interconnect Cabling
 
-* *Mains AC power cable*: Belden 8267 (RG-213/U flexible coax, 50 Ω, 13 AWG, PVC jacket)
-* *3 × 2 m runs*:
-. Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth); shield to enclosure frame
-. Run 2: CCPF AC ground → rig chassis ground (star-point safety earth)
-. Run 3: E-stop circuit loop (redundant mains disconnect path)
-* Shield grounded *single-point* at enclosure frame only (avoid ground loops)
-* Signal cabling: STP with ferrite clamps for V_PROG/V_MON/INHIBIT/EOC; twisted pair for gate drive
-* Discharge loop: *wide flat copper busbars only* (no cable); short heavy copper tubing or braided strap from SCR to reactor
+This section covers three distinct cabling roles in the rig, each with different requirements:
 
-=== Discharge Flex Link Alternatives
+. **Mains AC power** — 220 VAC L/N/Earth between enclosure inlet, CCPF-1700, and chassis earth. Requires a proper 3-conductor power cable.
+. **Signal cabling** — V_PROG, V_MON, INHIBIT, EOC, gate drive. Low-voltage, low-current, but needs shielding against the kA discharge EMI.
+. **Discharge loop** — bank to SCR to reactor electrodes. Carries the pulse current. Bus bars by default; flexible options documented for the SCR-to-reactor segment where mechanical compliance is needed.
 
-The default discharge architecture per the loop note above uses braided copper strap or heavy copper tubing from SCR to reactor. The notes below cover two adjacent topics: operational care if a flexible coax (RG-213 / Belden 8267) is substituted for the strap, and upgrade paths for higher cycle life or longer-run installations.
+=== Mains AC power cabling
+
+* *Cable*: 14 AWG, 3-conductor SOOW or SJOOW (e.g., Carol C202814 or equivalent), rated 600 V / 90 °C, EPDM jacket
+* *3 × 2 m runs* (revised — previously misspecified as Belden 8267 coax, which is a 2-conductor cable and cannot carry L/N/Earth):
+. Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth)
+. Run 2: CCPF chassis ground stud → rig chassis ground star point (single conductor, 10 AWG green/yellow grounding wire)
+. Run 3: E-stop circuit loop (low-voltage signal pair, shielded — does *not* need power cable construction)
+* *Terminations*: factory or field-installed strain-relief connectors at both ends; IEC C13/C14 at the CCPF if appropriate
+* *Earth bonding*: single-point star ground at the enclosure frame
+* *Code compliance*: install per NEC 400.7 for portable cordage in a fixed enclosure context
+
+=== Signal cabling
+
+* STP (shielded twisted pair) with ferrite clamps for V_PROG / V_MON / INHIBIT / EOC
+* Twisted pair for gate drive
+* Shield grounded *single-point* at the controller (avoid ground loops)
+
+=== Discharge loop (default)
+
+The complete discharge path runs Bank → SCR → reactor. Two segments, both copper bus bar by default. Cable substitution is supported only for the SCR-to-reactor segment (see "flex link alternative" below).
+
+[cols="1,2,3", options="header"]
+|===
+| Segment | Geometry | Source / spec
+
+| Bank → SCR (cap bank rails) | 25 × 6 mm copper, two rails, ~80 cm length each, SCR mounted at geometric center of 7×2 cap grid for balanced loop inductance | Locked. See `spec/02_capacitor_bank.adoc` (`#sec-cap-bank`)
+| SCR → reactor (load segment) | Wide flat copper bus bar or heavy braided strap; specific cross-section / length TBD | **Pending** — `GAP-DISCHARGE-LOOP-GEOMETRY` in `data/pending.yaml`. Default assumption: ≥25 × 6 mm Cu equivalent cross-section to match bank rails; length minimized to keep loop inductance low.
+|===
+
+NOTE: The cap-bank-end rails are well-specified; the SCR-to-reactor segment depends on final mechanical layout of the reaction chamber relative to the SCR fixture (see `spec/03_discharge_switch.adoc` and `mechanical/scr-fixture/` when populated). No cable substitution by default — bus bar throughout.
+
+=== Discharge loop (flex link alternative — SCR to reactor only)
+
+When mechanical compliance to a removable reactor assembly is needed, the SCR-to-reactor segment may use a flexible cable. The default Belden 8267 (RG-213/U) is acceptable for short runs with active monitoring; better options exist for sustained or long-run installations.
 
 ==== Option: RG-213 (Belden 8267) as discharge flex link
 
-Acceptable for short flex runs when mechanical compliance to a removable reactor assembly is needed. Not a long-term low-maintenance choice; needs scheduled inspection.
+Acceptable for short flex runs with mechanical compliance to a removable reactor assembly. Not a long-term low-maintenance choice; needs scheduled inspection.
 
 * *Length*: ≤ 1 m (0.5 m preferred). Resistive loss is ~1.8% of shot energy per meter at design conditions; per-meter ΔT is ~17 K per shot. Going beyond ~1 m stresses the PVC jacket (rated 80 °C) under repeated shots.
 * *Terminations*: crimped lugs only, no solder (solder joints fatigue under repeated pulse heating). Bond braid circumferentially to the return path at both ends; do not pigtail the braid to a single point.
@@ -45,3 +73,5 @@ Listed in order of incremental improvement over RG-213. The bigger conductor cro
 * *Type W 2/0 portable power*: workhorse upgrade — heavily stranded portable power cable, EPDM jacket, industrial robust. Run two conductors twisted or zip-tied at ~100 mm intervals to keep the inductive loop area small. Terminate with hydraulic-crimped compression lugs.
 * *Spot welder kickless cable*: industrial-pedigree option — coaxial geometry built in, designed for millions of pulse cycles. Suppliers: Watteredge, NWL Capacitors, Mersen, Hi-Tech Industries. Water-cooled variants available for sustained high-rate operation.
 * For sustained operation > 10 shots/min or runs > 2 m, Type W or kickless cable is recommended over scaling RG-213.
+
+NOTE: Earlier revisions of this spec listed Belden 8267 as the mains AC cable across all three runs. This was incorrect — RG-213/U is a 2-conductor coaxial cable and cannot safely carry L/N/Earth on a single run. The mains AC cable has been revised to proper 3-conductor SOOW. Belden 8267 remains specified only for the discharge flex link (SCR to reactor) where coaxial geometry is appropriate.
