@@ -86,6 +86,8 @@ For the 18 mm ID quartz tube and 1 g carbon-black feedstock, the electrode archi
 ** Below ~0.5 Ω: discharge too fast, ringing dominates
 ** Above ~20 Ω: rectifier-side losses dominate before sample heats fully
 
+NOTE: The 1–10 Ω range is intentionally wider than the published Tour-group optimum (0.5–2 Ω, Tour 2020 and Tan 2026 review). The wider range is appropriate for this rig's intended feedstock variety (carbon black, calcined coke, biochar) where the achievable compressed-state resistance varies by feedstock grade and packing density. Higher R_sample (3–10 Ω) yields functional flash-graphene product, though Raman 2D peak quality and turbostratic stacking may be modestly lower than at the published optimum. Process tuning per feedstock is expected; the 0.5 Ω lower bound and 20 Ω upper bound are the *hard* failure modes.
+
 === Open electrode design questions
 
 Six open items (Q1–Q6) remain in the electrode subsystem, tracked as `ELECTRODE-Q1` through `ELECTRODE-Q6` in `data/pending.yaml`:

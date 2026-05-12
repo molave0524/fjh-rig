@@ -7,17 +7,22 @@
 === Sample branch
 `IDLE → EJECT → LOAD → AR_PURGE → COMPRESS → R_VERIFY → READY_TO_FIRE → POST_FIRE_HOLD → IDLE`
 
+NOTE: The sample branch covers *prep-zone* operations that run in parallel with the charge branch. Inline reaction-zone tube swap (after FIRE, before next CHARGE) is a separate ~30 s envelope documented in `spec/04b_sample_prep.adoc`. See that section for the full prep workflow and station layout.
+
 === Cycle timing
 
-[cols="2,1", options="header"]
+[cols="2,1,2", options="header"]
 |===
-| Phase | Duration
+| Phase | Duration | Notes
 
-| Charge (20 kJ @ 1000 J/s) | ~20 s
-| Sample handling           | ~20–25 s
-| FIRE + discharge          | <1 s
-| Dump-bleed                | ~0.75 s
-| *Effective cycle*         | *~25–30 s*
+| Charge (20 kJ @ 1000 J/s)   | ~20 s    | Charge branch, exclusive
+| Parallel sample prep        | ~20–25 s | Sample branch in prep zone, runs *concurrent* with charge — does not add to cycle time
+| FIRE + discharge            | <1 s     | Charge branch
+| Dump-bleed                  | ~0.75 s  | Charge branch
+| Inline tube swap            | ~5 s     | Reaction-zone tube swap after dump-bleed, before next charge starts. See `spec/04b_sample_prep.adoc` for full ~30 s envelope including door interlock release.
+| *Effective cycle*           | *~25–30 s* | Charge time dominates; parallel prep keeps the sample branch off the critical path
 |===
 
-The charge branch is the cycle gate (was the sample branch in the 10-cap config).
+The charge branch is the cycle gate. Parallel prep means the sample branch's ~20–25 s of work does not extend the cycle as long as it completes within the charge window. If prep takes longer (e.g., during operator training or for difficult feedstocks), cycle time stretches to match the sample branch.
+
+CAUTION: Parallel operation requires the operator to be in the prep zone (or fully outside the enclosure) during `CHARGE` and `READY_TO_FIRE` states. The reaction-zone door must be interlock-locked during these states. See `spec/04b_sample_prep.adoc` and `spec/07_safety.adoc` for the safety architecture.

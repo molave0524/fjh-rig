@@ -47,6 +47,7 @@ fjh-rig/
 │   ├── 02_capacitor_bank.adoc
 │   ├── 03_discharge_switch.adoc
 │   ├── 04_reaction_chamber.adoc
+│   ├── 04b_sample_prep.adoc
 │   ├── 05_atmosphere.adoc
 │   ├── 06_control_electronics.adoc
 │   ├── 07_safety.adoc
@@ -110,7 +111,10 @@ Items caught during specification development, recorded to prevent regression. F
 * "Coilcraft VPH4-0190" — *part does not exist*; correct part is *SD250-3L*
 * 80 µs gate pulse width — saturates SD250-3L core; corrected to 25–40 µs
 * "ChemGlass 4100N32" — not in ChemGlass catalog; actual source is *Wale Apparatus CFQ18X21.6*
+* Cap-bank ESR figures — used unsourced values (~10 mΩ then ~24 mΩ per cap); correct value is *13 mΩ at 100 Hz, 20 °C* per Kemet datasheet → bank ESR 0.93 mΩ for 14 caps in parallel
 
-== License / Project info
+== License
 
-Private project. Not for distribution. See LICENSE for terms if added.
+This work is licensed under the MIT License. See `LICENSE` at repo root for the full terms.
+
+The license applies to the documentation, software, and design files in this repository. It does not grant rights to third-party patents (including the Flash Joule Heating patent family WO2020051000A1 / US20210206642A1 held by William Marsh Rice University and Tour et al.). Anyone building physical implementations should perform their own patent due diligence.

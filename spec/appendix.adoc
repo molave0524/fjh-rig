@@ -6,7 +6,8 @@
 |===
 | Revision | Changes
 
-| 14-cap-N170-W8-Wale-Arch4-Repo (current) | Repo conversion: spec split into per-subsystem files under `spec/`; structured BOM/pending moved to `data/`; placeholder folders for `schematics/`, `mechanical/`, `firmware/`
+| 14-cap-N170-W8-Wale-Arch4-Audit1 (current) | Audit response: corrected Belden 8267 mains AC misuse (replaced with 14 AWG 3-conductor SOOW; Belden 8267 retained only for SCR-to-reactor discharge flex link); added `spec/04b_sample_prep.adoc` documenting the parallel prep station workflow that makes the 25-30 s cycle achievable; updated `spec/10_fsm_timing.adoc` to distinguish inline vs parallel sample handling
+| 14-cap-N170-W8-Wale-Arch4-Repo | Repo conversion: spec split into per-subsystem files under `spec/`; structured BOM/pending moved to `data/`; placeholder folders for `schematics/`, `mechanical/`, `firmware/`
 | 14-cap-N170-W8-Wale-Arch4 | Electrode architecture locked: Arch 4 (graphite puck + Cu push rod); Q1–Q6 design questions tracked
 | 14-cap-N170-W8-Wale-AsciiDoc | Format conversion to AsciiDoc; gap-fill sections added (Diagnostics, Procedures); BOM extracted to CSV; Pending items extracted to YAML
 | 14-cap-N170-W8-Wale-18mm | Quartz tube locked: 18 mm ID × 21.6 mm OD (Wale Apparatus CFQ18X21.6)
@@ -26,3 +27,4 @@ These items were caught and corrected during specification development; document
 * "Coilcraft VPH4-0190" — *part does not exist*. Correct part: *SD250-3L*.
 * 80 µs gate width — *saturates SD250-3L core*. Corrected to 25–40 µs.
 * "ChemGlass 4100N32" quartz tube — *part not in ChemGlass catalog*. Actual source: *Wale Apparatus CFQ18X21.6*.
+* Cap-bank ESR figures cited various unsourced per-cap values (~10 mΩ in early spec, ~24 mΩ in audit response). *Correct value: 13 mΩ at 100 Hz, 20 °C* per Kemet ALS70A183QS400 datasheet (confirmed via Digikey listing). Bank ESR (14-cap parallel) = 0.93 mΩ at datasheet conditions; ESR drops further at elevated operating temperature.

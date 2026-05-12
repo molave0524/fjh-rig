@@ -5,11 +5,14 @@ Capacitor Bank,Cu busbar,25mm x 6mm copper bar,2,15,20,McMaster-Carr,sourcing,~8
 Capacitor Bank,Inrush resistor,~25 ohm 500W power resistor,1,40,80,various,pending-sizing,Tau ~6.3s; verify for cold full-bank charge
 Capacitor Bank,Bleed resistor,12.5 kohm 50W,1,20,40,various,sourcing,Tau ~52min; 12.8W steady-state
 Capacitor Bank,Dump SCR/contactor,LEV200 or equivalent,1,60,130,Tyco/various,sourcing,Default-closed fail-safe
-Capacitor Bank,Freewheel diode,High-current diode across bank,1,15,30,various,sourcing,Reverse-polarity protection
-Capacitor Bank,Per-cap fuse,fast-blow rated for cap fault,14,3,8,various,sourcing,Limits failure-mode energy per cap
-Capacitor Bank,Bank thermistor,NTC sensor + comparator,1,5,15,various,sourcing,Abort at 50 deg C
+Capacitor Bank,Freewheel diode,Vishay VS-VSKT160-12 stud rectifier 160A/1200V (or equiv IXYS DSI120-12A),1,20,30,Vishay/IXYS (Mouser/Digikey),sourcing,Reverse-polarity protection; cathode to bank+; M16 stud + small finned heatsink; standard recovery sufficient
+Capacitor Bank,Per-cap fuse,Mersen A50QS80-4 80A/500VDC semiconductor protection fuse,14,15,25,Mersen (Mouser/Newark),sourcing,Semiconductor-protection class (NOT ordinary fast-blow); sized for ~4500 A2s per-shot pulse i2t; verify on first commissioning shot. Limits fault energy per cap on internal short.
+Capacitor Bank,Bank thermistor,NTC sensor + comparator,1,5,15,various,sourcing,Abort at 40 deg C (lowered from 50 for earlier warning of thermal accumulation)
 Discharge Switch,N170CH12,WESTCODE press-pack thyristor W8 puck,1,150,300,WESTCODE (surplus),sourcing,1200V/339A avg/4200A pulse
-Discharge Switch,Clamping fixture,Al/Cu plates 6mm + steel rods + PEEK + Belleville,1,50,100,fabricate,build,10-20kN at 1.5mm Belleville deflection
+Discharge Switch,Clamping plates,Aluminum 6061-T651 4"x4"x0.75" precision ground blank,2,40,60,OnlineMetals (mp-00000294),sourcing,For W8 puck fixture; +/-0.002" tolerance; verify flatness on receipt
+Discharge Switch,Clamping rods + isolation,4x M8x100mm stainless threaded rod + PEEK sleeves + shoulder washers + M8 nuts,1,20,40,various,sourcing,60mm rod spacing; PEEK isolation between rods and plates
+Discharge Switch,Belleville stack,McMaster 96445K446 chrome-vanadium 8.2 ID x 18 OD x 1.0 thick (3 packs of 12),3,3.62,3.62,McMaster-Carr,sourcing,2 nested x 4 inverted per rod (8/rod, 32 total + 4 spares); ~12 kN at 1.5 mm deflection
+Discharge Switch,Bus-bar interface hardware,4x M8x20 SS hex head bolt + M8 Belleville lock washer + vinyl insulating cap,1,10,20,various,sourcing,2 bolts per plate tapped into back face; HV-rated insulating caps over bolt heads
 Discharge Switch,SD250-3L,Coilcraft pulse transformer for gate driver,1,8,12,Coilcraft (Mouser/Digikey),sourcing,Replaces nonexistent VPH4-0190
 Discharge Switch,Gate MOSFET,opto-isolated MOSFET driver,1,5,15,various,sourcing,
 Discharge Switch,RC snubber,Across SCR,1,5,15,various,sourcing,
@@ -21,6 +24,14 @@ Reaction Chamber,Tube-end termination,Cap/seal housing for push rod entry,2,30,8
 Reaction Chamber,Load cell,Compression force feedback,1,40,120,various,sourcing,Essential for tilt/asymmetric load detection
 Reaction Chamber,4-wire R probe,Sample resistance measurement,1,20,50,fabricate,build,Disconnect before fire reconnect after dump
 Reaction Chamber,BN tube (upgrade),Hot-pressed boron nitride 18mm ID,1,200,200,various,future,8x cost; 1000+ shot extrapolated life
+Sample Prep,Analytical balance,0.01-0.1g resolution e.g. Ohaus Scout SKX223,1,150,300,Ohaus/various,sourcing,Prep zone; 1g sample weighing
+Sample Prep,Compression jig,Bench-mounted vise/screw-clamp + load cell or pneumatic ram,1,100,300,fabricate/various,pending-design,Target 5-50 MPa over 254 mm2 = 1.3-13 kN; shared load cell with reaction position TBD (PREP-Q2)
+Sample Prep,Resistance verifier,4-wire ohmmeter w/ Kelvin clips 0.1-20 ohm range,1,80,200,Keithley/various,sourcing,Can be benchtop DMM e.g. Keithley 2110
+Sample Prep,Tube parking station,Holds 2-3 prepared tubes upright,1,30,80,fabricate,build,Prevents column shift before transfer
+Sample Prep,Transfer tray,Manual hand-carry tray w/ column-keeper,1,20,50,fabricate,build,V1 option; sliding stage deferred to future
+Sample Prep,Spare tubes for rotation,Additional CFQ18X21.6 (3-tube rotation pool),2,55,55,Wale Apparatus,sourcing,Rotation pool: 3 tubes + 3 electrode sets
+Sample Prep,Spare push rods for rotation,Additional C110 Cu rods,4,15,30,McMaster-Carr,sourcing,Rotation pool: 2 sets x 2 rods
+Sample Prep,PPE,Cut-resistant gloves + N95/P100 respirator + safety glasses,1,50,100,various,sourcing,Stored at prep zone
 Atmosphere,Rotary vane pump,3.5 cfm pump,1,200,500,used market,sourcing,
 Atmosphere,901P-11030,MKS pressure gauge KF-25 direct mount,1,170,200,MKS (refurb),sourcing,LOCKED; 10^-5 to 1000 Torr
 Atmosphere,722A02T,MKS Baratron 10 Torr capacitance manometer,1,150,300,MKS,sourcing,
@@ -36,9 +47,11 @@ Control,ADS1115,16-bit I2C ADC,1,5,10,Adafruit,sourcing,V_MON input
 Control,Optoisolators,6N137 high-speed,4,2,3,various,sourcing,
 Control,Ferrite clamps,For signal cables,8,2,5,various,sourcing,
 Control,Isolated wall-wart,For ESP32 power,1,10,15,various,sourcing,Never tied to bank ground
-Power Cabling,Belden 8267,75 ohm semi-rigid coax 3x 2m runs,1,80,150,Belden (Mouser),sourcing,Mains AC + ground + e-stop
+Power Cabling,Mains AC cable,14 AWG 3-conductor SOOW 600V 90C EPDM jacket 3x 2m runs,3,15,30,Carol/General Cable,sourcing,Replaces incorrect Belden 8267 mains spec; L/N/Earth per NEC 400.7
+Power Cabling,Earth/ground wire,10 AWG green/yellow grounding wire,1,10,20,various,sourcing,CCPF to chassis star-point single conductor
+Power Cabling,Belden 8267,RG-213/U flexible coax 50 ohm 13 AWG (for discharge flex link only, not mains AC),1,30,60,Belden (Mouser),sourcing,SCR-to-reactor flex link <=1m; NOT for mains AC (2-conductor cable)
 Diagnostics,Rogowski coil,PEM CWT or similar 0-10kA range,1,200,500,PEM/various,sourcing,GAP-FILL diagnostic
-Diagnostics,HV divider,10:1 or 100:1 BNC-out,1,50,200,various,sourcing,GAP-FILL diagnostic
+Diagnostics,HV divider,100:1 ratio LOCKED BNC-out >=10 MHz bandwidth,1,50,200,various,sourcing,GAP-FILL diagnostic; locked at 100:1 (was 10:1 or 100:1); 100:1 keeps scope input <4V under transient ringing
 Diagnostics,Oscilloscope,4-channel 100MHz min deep memory,1,300,1500,various,sourcing,GAP-FILL diagnostic; can be existing lab scope
 Diagnostics,Photodiode,BPW34 + amplifier,1,1,10,Vishay,sourcing,GAP-FILL diagnostic; flash t=0 reference
 Enclosure,Aluminum enclosure,Faraday-shielded chassis,1,100,300,Hammond/various,sourcing,

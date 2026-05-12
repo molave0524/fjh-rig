@@ -10,6 +10,21 @@ pending:
     subsystem: charging-supply
     blocks: commissioning
 
+  - id: VERIFY-FUSE-ITT
+    description: Measure actual per-cap pulse i2t on first commissioning shots with clip-on current probe
+    status: open
+    priority: medium
+    subsystem: capacitor-bank
+    notes: Per-cap fuse spec'd as Mersen A50QS80-4 (~6000 A2s pre-arc) sized for estimated 4500 A2s per-shot pulse. Verify actual value with on-cap probe; can downsize to A50QS50-4 (~2500 A2s) if margin proves generous, saves ~$50 across 14 caps.
+
+  - id: VERIFY-CAP-ESR-BASELINE
+    description: Measure per-cap ESR baseline at installation with milliohmmeter/LCR meter
+    status: open
+    priority: medium
+    subsystem: capacitor-bank
+    notes: |
+      Per spec/02_capacitor_bank.adoc Pulse Life section. Measure each cap's ESR (~13 mOhm datasheet baseline @ 100 Hz / 20 C) before bank assembly. Record in a spreadsheet keyed to cap serial number / position. Re-measure every ~5000 shots or at major service intervals; replace individual caps at 2x baseline, full bank at 1.5x average. Suggested instrument: DER EE DE-5000 LCR meter or equivalent.
+
   - id: VERIFY-CCPF-RATE
     description: Verify actual charge rate (1000 J/s test vs 1700 J/s nameplate)
     status: open
@@ -37,7 +52,7 @@ pending:
     status: open
     priority: high
     subsystem: discharge-switch
-    notes: Belleville stack 1.5 mm deflection target
+    notes: Belleville stack 96445K446, 2 nested x 4 inverted per rod, 1.5 mm deflection target
 
   - id: SIZE-INRUSH
     description: Size inrush resistor for cold full-bank charge at 252 mF
@@ -59,6 +74,14 @@ pending:
     priority: medium
     subsystem: capacitor-bank
     notes: Compare measured peak current to predicted
+
+  - id: GAP-DISCHARGE-LOOP-GEOMETRY
+    description: SCR-to-reactor discharge segment geometry (cross-section, length, attachment hardware)
+    status: open
+    priority: high
+    subsystem: power-cabling
+    notes: |
+      Bank-to-SCR segment is locked (25 x 6 mm Cu rails, 80 cm). SCR-to-reactor segment is currently described as "wide flat copper bus bar or heavy braided strap" without specifics. Resolution depends on final mechanical layout of reaction chamber relative to SCR fixture. Default assumption: ≥25 x 6 mm Cu equivalent cross-section, length minimized for low loop inductance. Cable substitution (Belden 8267) supported only for this segment, with constraints in spec/08.
 
   - id: DESIGN-SAMPLE-HANDLING
     description: Sample-handling mechanization design
@@ -191,6 +214,53 @@ pending:
     depends_on: [ELECTRODE-Q1, ELECTRODE-Q2]
     notes: ~$60 of stock yields ~30 pucks. Use bandsaw or cutoff wheel; one face per puck only needs lapping if stock face finish insufficient.
 
+  # === Sample prep station (added 2026-05-12 from audit response) ===
+  # Documents the parallel prep workflow that makes the 25-30 s cycle achievable.
+  # See spec/04b_sample_prep.adoc.
+
+  - id: PREP-Q1
+    description: Tube transfer mechanism (manual hand-carry tray vs sliding stage)
+    status: open
+    priority: medium
+    subsystem: sample-prep
+    notes: Manual tray recommended for V1 build; sliding stage deferred as FUTURE upgrade.
+
+  - id: PREP-Q2
+    description: Compression jig load cell - shared with reaction position or dedicated prep-zone load cell
+    status: open
+    priority: medium
+    subsystem: sample-prep
+    notes: Shared simplifies BOM; dedicated allows parallel R-verify during fire.
+
+  - id: PREP-Q3
+    description: Prep zone footprint and layout within enclosure
+    status: open
+    priority: high
+    subsystem: sample-prep
+    depends_on: GAP-ENCLOSURE-DESIGN
+    notes: Two-zone partition design; partition must be conductive and bonded to chassis for EMI containment.
+
+  - id: PREP-Q4
+    description: Spent-column extraction and tube cleaning protocol
+    status: open
+    priority: medium
+    subsystem: sample-prep
+    notes: Between rotation cycles. Affects tube reuse rate and cross-shot contamination.
+
+  - id: PREP-Q5
+    description: Feedstock batch pre-portioning - pre-weighed vials or weigh-per-shot
+    status: open
+    priority: low
+    subsystem: sample-prep
+    notes: Pre-weighed vials saves prep time but adds vial inventory; weigh-per-shot is simpler.
+
+  - id: GAP-ENCLOSURE-DESIGN
+    description: Outer enclosure design including two-zone partition for parallel prep
+    status: open
+    priority: high
+    subsystem: enclosure
+    notes: Drives prep zone footprint (PREP-Q3); covers EMI shielding, interlocks, ventilation, HEPA filtration intersection.
+
 future:
   - id: FUTURE-LARGER-TUBE
     description: 22-25 mm tube ID for >1 g batches
@@ -198,9 +268,12 @@ future:
     notes: Requires electrode redesign
 
   - id: FUTURE-FILM-CAPS
-    description: Film cap upgrade
+    description: Pulse-rated cap upgrade (Vishay 159 PUL-SI / CDE 947D / film)
     status: deferred
-    notes: When electrolytic life becomes operationally annoying
+    notes: |
+      When electrolytic pulse life (~20-50k shots realistic for ALS70 in FJH duty) becomes operationally limiting.
+      Pulse-rated Al electrolytic: 100k-1M shots; film: 1M+ shots at higher cost per kJ.
+      Decision should be driven by realized shot rate, not preemptive.
 
   - id: FUTURE-PYROMETRY
     description: In-situ pyrometry
@@ -231,7 +304,7 @@ resolved:
   - id: RES-MAINS-CABLE
     description: Mains AC cabling spec
     status: verified
-    resolution: Belden 8267 (3 x 2 m runs)
+    resolution: 14 AWG 3-conductor SOOW (corrected from initial Belden 8267 spec; RG-213/U is 2-conductor coax and cannot carry L/N/Earth). Belden 8267 retained only for SCR-to-reactor discharge flex link role.
 
   - id: RES-GATE-PART
     description: Gate driver pulse transformer corrected

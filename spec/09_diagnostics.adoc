@@ -10,7 +10,7 @@ CAUTION: This section was identified as a gap in the original spec. Without diag
 | Instrument | Purpose / spec
 
 | Rogowski coil          | Discharge current waveform, kA-scale (0–10 kA range, ~10 ns rise time, e.g., PEM CWT or similar)
-| HV divider             | Bank voltage trace through discharge (10:1 or 100:1, BNC out)
+| HV divider             | Bank voltage trace through discharge — *LOCKED at 100:1*, BNC out, ≥10 MHz bandwidth. 100:1 chosen over 10:1 because 10:1 puts 40 V on the scope input which risks transient excursion beyond standard 1× probe ratings during discharge ringing; 100:1 keeps scope-side excursion below 4 V (well within tolerance) at the cost of modest resolution.
 | Oscilloscope           | Capture both traces; 4-channel, 100 MHz minimum, deep memory for full discharge tail
 | Photodiode (BPW34, ~$1) | Independent flash t=0 reference; useful sanity check vs. electrical trigger
 |===

@@ -1,3 +1,4 @@
+[#sec-overview]
 == Purpose and Headline Performance
 
 A bench-scale FJH rig targeted at research-grade material quality with operational tempo suitable for production characterization runs.
@@ -68,3 +69,5 @@ A bench-scale FJH rig targeted at research-grade material quality with operation
    │ argon / vacuum  │
    └─────────────────┘
 ----
+
+NOTE: A separate **prep zone** inside the enclosure runs in parallel with the reaction zone, allowing the next sample tube to be prepared while the bank charges. The prep zone is not shown in the simplified diagram above. See `spec/04b_sample_prep.adoc` for the prep workflow, station equipment, two-zone partition, and safety architecture during parallel operation.

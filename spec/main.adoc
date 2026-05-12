@@ -29,6 +29,8 @@ include::03_discharge_switch.adoc[]
 
 include::04_reaction_chamber.adoc[]
 
+include::04b_sample_prep.adoc[]
+
 include::05_atmosphere.adoc[]
 
 include::06_control_electronics.adoc[]

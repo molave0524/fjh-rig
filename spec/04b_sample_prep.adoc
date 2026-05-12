@@ -1,0 +1,119 @@
+[#sec-sample-prep]
+== Sample Preparation Workflow and Station
+
+The rig's ~25–30 s cycle time depends on a **parallel prep station** where the next sample tube is fully prepared while the bank charges. Without this parallel workflow, the cycle becomes serial (~45 s) and the production tempo claim doesn't hold. This section documents the prep station, the operator workflow, and the handoff into the reaction position.
+
+NOTE: This section was added in audit-response revision 2026-05-12. The prep-station model was previously implicit in `spec/10_fsm_timing.adoc` and `spec/00_overview.adoc` cycle-time claims but not documented as a discrete subsystem.
+
+=== Operational concept
+
+The rig has two parallel work zones, both inside the outer enclosure but physically separated by an internal partition:
+
+* *Reaction zone*: bank, SCR, reaction tube in firing position, discharge bus bars. HV-energized during `CHARGE` and `READY_TO_FIRE` states. Operator does *not* enter this zone while bank is above 50 V.
+* *Prep zone*: scale, compression jig, R-verify probe, parking station for the prepared tube. No HV exposure. Operator works here while bank charges.
+
+Between shots, a manual transfer moves the prepared tube from the prep zone into the reaction position, and the spent column from the reaction position back to the prep zone (for column extraction and tube clean/reuse). The transfer mechanism is a sliding stage or hand-carry tray, depending on the final mechanical design (see `mechanical/sample-handling/`).
+
+The two-zone partition serves three purposes:
+
+. *Safety*: physical barrier between operator and HV-energized reaction zone during charge
+. *Cleanliness*: keeps graphene dust contained to the reaction zone; prep zone stays clean for handling new feedstock
+. *Cycle time*: enables parallel prep that's the basis for the 25–30 s cycle claim
+
+=== Prep station equipment
+
+[cols="2,3", options="header"]
+|===
+| Item | Spec
+
+| Analytical balance        | 0.1 g resolution adequate for 1 g samples; 0.01 g preferred. Bench-top, e.g., Ohaus Scout SKX223 or equivalent.
+| Compression jig           | Bench-mounted vise or screw-clamp with load-cell feedback (load cell shared with reaction position or duplicated). Pneumatic option for repeatability. Target 5–50 MPa over 254 mm² → 1.3–13 kN.
+| Resistance verifier       | 4-wire ohmmeter with Kelvin clip leads, range 0.1–20 Ω. Can be a benchtop DMM (e.g., Keithley 2110) or a dedicated milliohmmeter.
+| Tube parking station      | Holds 2–3 prepared tubes upright between use. Prevents column shift before transfer.
+| Tube transfer mechanism   | Manual hand-carry tray *or* sliding stage. Tray sized to keep column vertical during transfer.
+| Workspace surface         | Clean, non-conductive, ~600 × 400 mm minimum. ESD mat optional but recommended for the R-verify step.
+| PPE storage               | Cut-resistant gloves, safety glasses, N95 / P100 respirator within reach of the prep zone.
+|===
+
+=== Tube and electrode inventory in rotation
+
+Minimum rotation: 2 tubes + 2 electrode sets.
+
+[cols="1,2,2", options="header"]
+|===
+| Position | Contents | State
+
+| Reaction zone        | Tube N + electrodes N + spent column | Just fired; awaits dump-bleed + transfer back
+| Prep zone (parking)  | Tube N+1 + electrodes N+1 + fresh column | Pre-prepared; ready for transfer in
+| Prep zone (in-prep)  | Tube N+2 (being loaded)              | In progress
+|===
+
+Recommended pool: 3 tubes + 3 electrode sets (2-puck + 2-rod per set) in rotation, so one set is always being cleaned/reset while two are in active rotation. With pucks at ~$2 each and a 4-ft tube yielding 8–12 columns, this is a low-cost margin.
+
+=== Operator workflow (prep zone)
+
+Per-shot prep workflow, typical time budget:
+
+[cols="1,2,1", options="header"]
+|===
+| Step | Action | Time
+
+| 1 | Retrieve clean tube + 2 graphite pucks + 2 Cu push rods from parts bin | 30 s
+| 2 | Weigh 1.00 ± 0.05 g of feedstock on analytical balance | 30 s
+| 3 | Insert lower puck into tube, then load feedstock column | 30 s
+| 4 | Insert upper puck; verify column height in window (5.6–8.4 mm for 1 g) | 15 s
+| 5 | Transfer assembly to compression jig; compress to target force (load cell feedback) | 60 s
+| 6 | 4-wire R-verify; record value; verify 1–10 Ω target (0.5–3 Ω preferred per published optimum) | 30 s
+| 7 | Park tube in parking station, ready for transfer | 15 s
+| *Total* | | *~3.5 minutes for one tube; well under the 20-s cycle if done during the previous shot's charge*
+|===
+
+NOTE: The 20–25 s "sample handling" duration in `spec/10_fsm_timing.adoc` is the *floor* for prep — it assumes practiced operator, ergonomic prep zone layout, and feedstock pre-portioned in batches. First-build operators should expect 3–5 minutes per tube initially, which fully consumes the bank charge time. Steady-state operation after operator practice trends toward 20–25 s of inline prep activity, with the remainder of the budget consumed by handoffs and inspection.
+
+=== Inline tube swap (reaction zone)
+
+After `DUMP_BLEED` completes and the door interlock releases (`V_MON < 50 V`):
+
+[cols="1,2,1", options="header"]
+|===
+| Step | Action | Time
+
+| 1 | Door interlock releases; open reaction zone | 5 s
+| 2 | Extract spent tube assembly; place on extraction tray | 5 s
+| 3 | Retrieve prepared tube from parking station | 5 s
+| 4 | Install prepared tube in reaction position; bus-bar contact via electrode clamping | 10 s
+| 5 | Close reaction zone door; interlock latches | 5 s
+| *Total inline swap* | | *~30 s* (envelope; some steps overlap with bank pre-charge)
+|===
+
+This is the *inline* part of the sample branch. The remaining prep work (weigh, load, compress, R-verify) happens in parallel during the next bank charge cycle.
+
+CAUTION: Door interlock must positively confirm `V_MON < 50 V` before release. Operator must not bypass interlock under any circumstance. Inline swap time begins only after interlock release, not after FIRE event.
+
+=== Operator safety during parallel operation
+
+* Bank charging happens with the reaction-zone door **locked** by interlock.
+* Operator is in the prep zone (or fully outside the enclosure) during all `CHARGE` and `READY_TO_FIRE` states.
+* Prep-zone door (if separate) does *not* interlock the bank — the prep zone has no HV exposure.
+* The two-zone partition must be conductive and bonded to chassis ground (Faraday shielding extends through the partition to keep EMI from the discharge out of the prep zone).
+* FIRE event is initiated by the operator from a control panel outside both zones, with the reaction-zone door confirmed locked.
+* Audible/visual indicators signal the operator when the bank is charged (`READY_TO_FIRE` lamp), when FIRE is armed, when the discharge has completed, and when the door interlock has released for transfer.
+
+=== Handoff: prep zone → reaction position
+
+The mechanical interface for tube transfer is open (`DESIGN-SAMPLE-HANDLING` pending). Two main options:
+
+. *Manual hand-carry tray*: simplest. Operator carries the prepared tube vertically on a small tray with column-keeper through the prep-zone door, opens the reaction-zone door, places into electrode clamps, withdraws hands, closes door. Adds operator handling time but minimal mechanical complexity.
+. *Sliding stage / cassette*: the prepared tube sits in a cassette in the prep zone; cassette translates through a sealed pass-through into the reaction zone where electrode clamps engage. Adds mechanical complexity but reduces transfer time and improves repeatability.
+
+Option 1 is recommended for first build. Option 2 is a `FUTURE-*` upgrade for sustained production.
+
+=== Open prep-station design questions
+
+* `PREP-Q1`: Manual tray vs sliding stage for tube transfer (recommend manual for V1)
+* `PREP-Q2`: Compression jig — shared load cell with reaction position, or dedicated prep jig load cell?
+* `PREP-Q3`: Prep-zone footprint and layout within the enclosure (depends on enclosure design — see `GAP-ENCLOSURE-DESIGN`)
+* `PREP-Q4`: Spent-column extraction and tube cleaning protocol (between rotation cycles)
+* `PREP-Q5`: Feedstock batch pre-portioning — pre-weighed vials or weigh-per-shot?
+
+These should be added to `data/pending.yaml` as design tasks alongside `DESIGN-SAMPLE-HANDLING`.
