@@ -15,14 +15,27 @@
 | R_thJK_          | 0.095 K/W (180° sine)
 |===
 
-=== Clamping fixture
+=== Clamping fixture (W8 puck)
 
-* Aluminum/copper plates min 6 mm thick
-* 4× steel rods
-* *PEEK sleeves + shoulder washers* (electrical isolation between rods and plates)
-* Guide fixture for 19 mm puck centering
-* Belleville washers at 1.5 mm deflection → 10–20 kN clamping force
-* Verify contact uniformity post-assembly
+[cols="2,3", options="header"]
+|===
+| Component | Spec
+
+| Plates              | Aluminum 6061-T651, 100 × 100 × 19 mm (4″ × 4″ × 0.75″), precision ground/milled 6-side blanks (±0.05 mm thickness). Source: link:https://www.onlinemetals.com/en/buy/aluminum/0-75-aluminum-6061-t651-precision-ground-milled-blanks/pid/mp-00000294[OnlineMetals mp-00000294]
+| Plate flatness      | ±10 µm across the 19 mm puck contact area; verify on receipt with precision straightedge and feeler gauge
+| Plate features      | Optional 20 mm dia × 0.5 mm deep puck-locating recess on inside face of each plate
+| Clamping rods       | 4 × M8 stainless threaded rod, **100 mm length**, 60 mm × 60 mm corner pattern (length accommodates plates + puck + Belleville stack + nuts with trim margin)
+| Rod isolation       | PEEK sleeves + PEEK shoulder washers (electrical isolation between rods and plates)
+| Belleville stack    | McMaster **96445K446** (chrome-vanadium steel, 8.2 mm ID × 18 mm OD × 1.0 mm thick). Stack configuration per rod: **2 nested × 4 inverted (8 washers per rod, 32 total)**. Delivers ~672 lbf (~3 kN) per rod at 1.5 mm stack deflection → ~12 kN total clamping force on the puck. Order qty 3 packs of 12 (36 washers, includes spares; ~$11)
+| Bus-bar joint       | Penetrox or equivalent on all Al–Cu interfaces (prevents Al oxide forming in the joint)
+| Bus-bar interface   | Plate back face; flat-to-plate contact with bus bar arriving from below
+| Joint bolt pattern  | 2× tapped blind holes per plate at 25 mm center-to-center, 12 mm from one edge of back face; clear of puck-locating recess and corner rods
+| Joint hardware      | 2× M8 × 20 mm stainless hex head bolt + M8 Belleville lock washer per plate (4 bolts total); ~12 mm thread engagement
+| Bolt insulation     | Vinyl or silicone insulating cap over each bolt head (defense-in-depth for HV-energized fastener; door interlocks + bleed/dump remain the primary defense)
+| Verification        | Pressure-sensitive film (e.g. Fujifilm Prescale LLW) under design clamp force; expect uniform color across the 19 mm puck face
+|===
+
+NOTE: Plate sizing here is specific to the N170CH12 W8 (19 mm) package. Earlier project notes referenced larger plates (150 × 150 × 30 mm, M12 rods, 25 kN) — those numbers were derived for an assumed-larger pole face and do not apply to the W8.
 
 === Gate driver
 

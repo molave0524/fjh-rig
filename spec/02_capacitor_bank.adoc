@@ -35,7 +35,7 @@ The Tour-group reference architecture, scaled up to 14 caps in pure parallel for
 | Dump SCR (or LEV200)    | Default-closed | Fail-safe; held closed by pull-down on reset/brownout
 | Freewheel diode         | Across bank    | Reverse-polarity protection
 | Per-cap fusing          | Recommended    | Limits failure-mode energy per cap
-| Bank thermistor         | Abort at 50 °C | Catches ESR-driven heating runaway
+| Bank thermistor         | Abort at 40 °C | Catches ESR-driven heating runaway; threshold lowered from 50 °C for earlier warning
 |===
 
 CAUTION: Bleed alone takes ~1.8 hours to drop the bank to <50 V. *Always* trigger the dump-bleed path (~750 ms) before service.

@@ -1,0 +1,147 @@
+diff --git a/data/bom.csv b/data/bom.csv
+index a22d8ba..48dbae2 100644
+--- a/data/bom.csv
++++ b/data/bom.csv
+@@ -7,9 +7,12 @@ Capacitor Bank,Bleed resistor,12.5 kohm 50W,1,20,40,various,sourcing,Tau ~52min;
+ Capacitor Bank,Dump SCR/contactor,LEV200 or equivalent,1,60,130,Tyco/various,sourcing,Default-closed fail-safe
+ Capacitor Bank,Freewheel diode,High-current diode across bank,1,15,30,various,sourcing,Reverse-polarity protection
+ Capacitor Bank,Per-cap fuse,fast-blow rated for cap fault,14,3,8,various,sourcing,Limits failure-mode energy per cap
+-Capacitor Bank,Bank thermistor,NTC sensor + comparator,1,5,15,various,sourcing,Abort at 50 deg C
++Capacitor Bank,Bank thermistor,NTC sensor + comparator,1,5,15,various,sourcing,Abort at 40 deg C (lowered from 50 for earlier warning of thermal accumulation)
+ Discharge Switch,N170CH12,WESTCODE press-pack thyristor W8 puck,1,150,300,WESTCODE (surplus),sourcing,1200V/339A avg/4200A pulse
+-Discharge Switch,Clamping fixture,Al/Cu plates 6mm + steel rods + PEEK + Belleville,1,50,100,fabricate,build,10-20kN at 1.5mm Belleville deflection
++Discharge Switch,Clamping plates,Aluminum 6061-T651 4"x4"x0.75" precision ground blank,2,40,60,OnlineMetals (mp-00000294),sourcing,For W8 puck fixture; +/-0.002" tolerance; verify flatness on receipt
++Discharge Switch,Clamping rods + isolation,4x M8x100mm stainless threaded rod + PEEK sleeves + shoulder washers + M8 nuts,1,20,40,various,sourcing,60mm rod spacing; PEEK isolation between rods and plates
++Discharge Switch,Belleville stack,McMaster 96445K446 chrome-vanadium 8.2 ID x 18 OD x 1.0 thick (3 packs of 12),3,3.62,3.62,McMaster-Carr,sourcing,2 nested x 4 inverted per rod (8/rod, 32 total + 4 spares); ~12 kN at 1.5 mm deflection
++Discharge Switch,Bus-bar interface hardware,4x M8x20 SS hex head bolt + M8 Belleville lock washer + vinyl insulating cap,1,10,20,various,sourcing,2 bolts per plate tapped into back face; HV-rated insulating caps over bolt heads
+ Discharge Switch,SD250-3L,Coilcraft pulse transformer for gate driver,1,8,12,Coilcraft (Mouser/Digikey),sourcing,Replaces nonexistent VPH4-0190
+ Discharge Switch,Gate MOSFET,opto-isolated MOSFET driver,1,5,15,various,sourcing,
+ Discharge Switch,RC snubber,Across SCR,1,5,15,various,sourcing,
+@@ -36,7 +39,7 @@ Control,ADS1115,16-bit I2C ADC,1,5,10,Adafruit,sourcing,V_MON input
+ Control,Optoisolators,6N137 high-speed,4,2,3,various,sourcing,
+ Control,Ferrite clamps,For signal cables,8,2,5,various,sourcing,
+ Control,Isolated wall-wart,For ESP32 power,1,10,15,various,sourcing,Never tied to bank ground
+-Power Cabling,Belden 8267,75 ohm semi-rigid coax 3x 2m runs,1,80,150,Belden (Mouser),sourcing,Mains AC + ground + e-stop
++Power Cabling,Belden 8267,RG-213/U flexible coax 50 ohm 13 AWG 3x 2m runs,1,80,150,Belden (Mouser),sourcing,Mains AC + ground + e-stop
+ Diagnostics,Rogowski coil,PEM CWT or similar 0-10kA range,1,200,500,PEM/various,sourcing,GAP-FILL diagnostic
+ Diagnostics,HV divider,10:1 or 100:1 BNC-out,1,50,200,various,sourcing,GAP-FILL diagnostic
+ Diagnostics,Oscilloscope,4-channel 100MHz min deep memory,1,300,1500,various,sourcing,GAP-FILL diagnostic; can be existing lab scope
+diff --git a/data/pending.yaml b/data/pending.yaml
+index 7ecb7f2..baaed4c 100644
+--- a/data/pending.yaml
++++ b/data/pending.yaml
+@@ -37,7 +37,7 @@ pending:
+     status: open
+     priority: high
+     subsystem: discharge-switch
+-    notes: Belleville stack 1.5 mm deflection target
++    notes: Belleville stack 96445K446, 2 nested x 4 inverted per rod, 1.5 mm deflection target
+ 
+   - id: SIZE-INRUSH
+     description: Size inrush resistor for cold full-bank charge at 252 mF
+diff --git a/spec/02_capacitor_bank.adoc b/spec/02_capacitor_bank.adoc
+index d15a334..cf7c483 100644
+--- a/spec/02_capacitor_bank.adoc
++++ b/spec/02_capacitor_bank.adoc
+@@ -35,7 +35,7 @@ The Tour-group reference architecture, scaled up to 14 caps in pure parallel for
+ | Dump SCR (or LEV200)    | Default-closed | Fail-safe; held closed by pull-down on reset/brownout
+ | Freewheel diode         | Across bank    | Reverse-polarity protection
+ | Per-cap fusing          | Recommended    | Limits failure-mode energy per cap
+-| Bank thermistor         | Abort at 50 °C | Catches ESR-driven heating runaway
++| Bank thermistor         | Abort at 40 °C | Catches ESR-driven heating runaway; threshold lowered from 50 °C for earlier warning
+ |===
+ 
+ CAUTION: Bleed alone takes ~1.8 hours to drop the bank to <50 V. *Always* trigger the dump-bleed path (~750 ms) before service.
+diff --git a/spec/03_discharge_switch.adoc b/spec/03_discharge_switch.adoc
+index 0f28137..e9ae688 100644
+--- a/spec/03_discharge_switch.adoc
++++ b/spec/03_discharge_switch.adoc
+@@ -15,14 +15,27 @@
+ | R_thJK_          | 0.095 K/W (180° sine)
+ |===
+ 
+-=== Clamping fixture
+-
+-* Aluminum/copper plates min 6 mm thick
+-* 4× steel rods
+-* *PEEK sleeves + shoulder washers* (electrical isolation between rods and plates)
+-* Guide fixture for 19 mm puck centering
+-* Belleville washers at 1.5 mm deflection → 10–20 kN clamping force
+-* Verify contact uniformity post-assembly
++=== Clamping fixture (W8 puck)
++
++[cols="2,3", options="header"]
++|===
++| Component | Spec
++
++| Plates              | Aluminum 6061-T651, 100 × 100 × 19 mm (4″ × 4″ × 0.75″), precision ground/milled 6-side blanks (±0.05 mm thickness). Source: link:https://www.onlinemetals.com/en/buy/aluminum/0-75-aluminum-6061-t651-precision-ground-milled-blanks/pid/mp-00000294[OnlineMetals mp-00000294]
++| Plate flatness      | ±10 µm across the 19 mm puck contact area; verify on receipt with precision straightedge and feeler gauge
++| Plate features      | Optional 20 mm dia × 0.5 mm deep puck-locating recess on inside face of each plate
++| Clamping rods       | 4 × M8 stainless threaded rod, **100 mm length**, 60 mm × 60 mm corner pattern (length accommodates plates + puck + Belleville stack + nuts with trim margin)
++| Rod isolation       | PEEK sleeves + PEEK shoulder washers (electrical isolation between rods and plates)
++| Belleville stack    | McMaster **96445K446** (chrome-vanadium steel, 8.2 mm ID × 18 mm OD × 1.0 mm thick). Stack configuration per rod: **2 nested × 4 inverted (8 washers per rod, 32 total)**. Delivers ~672 lbf (~3 kN) per rod at 1.5 mm stack deflection → ~12 kN total clamping force on the puck. Order qty 3 packs of 12 (36 washers, includes spares; ~$11)
++| Bus-bar joint       | Penetrox or equivalent on all Al–Cu interfaces (prevents Al oxide forming in the joint)
++| Bus-bar interface   | Plate back face; flat-to-plate contact with bus bar arriving from below
++| Joint bolt pattern  | 2× tapped blind holes per plate at 25 mm center-to-center, 12 mm from one edge of back face; clear of puck-locating recess and corner rods
++| Joint hardware      | 2× M8 × 20 mm stainless hex head bolt + M8 Belleville lock washer per plate (4 bolts total); ~12 mm thread engagement
++| Bolt insulation     | Vinyl or silicone insulating cap over each bolt head (defense-in-depth for HV-energized fastener; door interlocks + bleed/dump remain the primary defense)
++| Verification        | Pressure-sensitive film (e.g. Fujifilm Prescale LLW) under design clamp force; expect uniform color across the 19 mm puck face
++|===
++
++NOTE: Plate sizing here is specific to the N170CH12 W8 (19 mm) package. Earlier project notes referenced larger plates (150 × 150 × 30 mm, M12 rods, 25 kN) — those numbers were derived for an assumed-larger pole face and do not apply to the W8.
+ 
+ === Gate driver
+ 
+diff --git a/spec/08_power_cabling.adoc b/spec/08_power_cabling.adoc
+index 62a17ef..0b98022 100644
+--- a/spec/08_power_cabling.adoc
++++ b/spec/08_power_cabling.adoc
+@@ -1,7 +1,7 @@
+ [#sec-power-cabling]
+ == Power and Interconnect Cabling: Belden 8267
+ 
+-* *Mains AC power cable*: Belden 8267 (semi-rigid coax, 75 Ω)
++* *Mains AC power cable*: Belden 8267 (RG-213/U flexible coax, 50 Ω, 13 AWG, PVC jacket)
+ * *3 × 2 m runs*:
+ . Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth); shield to enclosure frame
+ . Run 2: CCPF AC ground → rig chassis ground (star-point safety earth)
+@@ -9,3 +9,39 @@
+ * Shield grounded *single-point* at enclosure frame only (avoid ground loops)
+ * Signal cabling: STP with ferrite clamps for V_PROG/V_MON/INHIBIT/EOC; twisted pair for gate drive
+ * Discharge loop: *wide flat copper busbars only* (no cable); short heavy copper tubing or braided strap from SCR to reactor
++
++=== Discharge Flex Link Alternatives
++
++The default discharge architecture per the loop note above uses braided copper strap or heavy copper tubing from SCR to reactor. The notes below cover two adjacent topics: operational care if a flexible coax (RG-213 / Belden 8267) is substituted for the strap, and upgrade paths for higher cycle life or longer-run installations.
++
++==== Option: RG-213 (Belden 8267) as discharge flex link
++
++Acceptable for short flex runs when mechanical compliance to a removable reactor assembly is needed. Not a long-term low-maintenance choice; needs scheduled inspection.
++
++* *Length*: ≤ 1 m (0.5 m preferred). Resistive loss is ~1.8% of shot energy per meter at design conditions; per-meter ΔT is ~17 K per shot. Going beyond ~1 m stresses the PVC jacket (rated 80 °C) under repeated shots.
++* *Terminations*: crimped lugs only, no solder (solder joints fatigue under repeated pulse heating). Bond braid circumferentially to the return path at both ends; do not pigtail the braid to a single point.
++* *Replacement schedule*: every 10,000–20,000 shots, or sooner if inspection signals trigger. Sync with capacitor service intervals where possible.
++* *Inspection protocol*:
++** Visual check of terminations every ~500 shots — discoloration, jacket damage near lugs
++** IR thermometer reading of jacket ~30 s after a shot — track trend, not absolute
++** End-to-end DC resistance with milliohmmeter every cap swap — log baseline; 50% increase = replace
++** Immediate replacement on: audible snap during discharge, visible jacket damage, resistance > 2× baseline
++
++==== Upgrade paths
++
++Listed in order of incremental improvement over RG-213. The bigger conductor cross-sections and proper pulse-rated constructions remove the inspection-heavy maintenance pattern.
++
++[cols="2,1,1,1,1", options="header"]
++|===
++| Cable | Conductor area | V rating | Cost (5 m pair) | Expected life
++
++| RG-213 (Belden 8267)        | 5.3 mm²  | 3.7 kV | ~$30   | 10–20k shots
++| RG-218/U                     | ~21 mm²  | 5 kV   | ~$150  | 30–50k shots
++| Type W 2/0 portable power    | 67 mm²   | 2 kV   | ~$200  | 100k+ shots
++| Spot welder kickless cable   | 107+ mm² | 2–5 kV | ~$500+ | 1M+ shots
++|===
++
++* *RG-218/U*: incremental upgrade — same coaxial geometry, scaled-up conductor and dielectric.
++* *Type W 2/0 portable power*: workhorse upgrade — heavily stranded portable power cable, EPDM jacket, industrial robust. Run two conductors twisted or zip-tied at ~100 mm intervals to keep the inductive loop area small. Terminate with hydraulic-crimped compression lugs.
++* *Spot welder kickless cable*: industrial-pedigree option — coaxial geometry built in, designed for millions of pulse cycles. Suppliers: Watteredge, NWL Capacitors, Mersen, Hi-Tech Industries. Water-cooled variants available for sustained high-rate operation.
++* For sustained operation > 10 shots/min or runs > 2 m, Type W or kickless cable is recommended over scaling RG-213.

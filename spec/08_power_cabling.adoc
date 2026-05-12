@@ -1,7 +1,7 @@
 [#sec-power-cabling]
 == Power and Interconnect Cabling: Belden 8267
 
-* *Mains AC power cable*: Belden 8267 (semi-rigid coax, 75 Ω)
+* *Mains AC power cable*: Belden 8267 (RG-213/U flexible coax, 50 Ω, 13 AWG, PVC jacket)
 * *3 × 2 m runs*:
 . Run 1: Enclosure AC inlet → CCPF-1700 AC input (L, N, Earth); shield to enclosure frame
 . Run 2: CCPF AC ground → rig chassis ground (star-point safety earth)
@@ -9,3 +9,39 @@
 * Shield grounded *single-point* at enclosure frame only (avoid ground loops)
 * Signal cabling: STP with ferrite clamps for V_PROG/V_MON/INHIBIT/EOC; twisted pair for gate drive
 * Discharge loop: *wide flat copper busbars only* (no cable); short heavy copper tubing or braided strap from SCR to reactor
+
+=== Discharge Flex Link Alternatives
+
+The default discharge architecture per the loop note above uses braided copper strap or heavy copper tubing from SCR to reactor. The notes below cover two adjacent topics: operational care if a flexible coax (RG-213 / Belden 8267) is substituted for the strap, and upgrade paths for higher cycle life or longer-run installations.
+
+==== Option: RG-213 (Belden 8267) as discharge flex link
+
+Acceptable for short flex runs when mechanical compliance to a removable reactor assembly is needed. Not a long-term low-maintenance choice; needs scheduled inspection.
+
+* *Length*: ≤ 1 m (0.5 m preferred). Resistive loss is ~1.8% of shot energy per meter at design conditions; per-meter ΔT is ~17 K per shot. Going beyond ~1 m stresses the PVC jacket (rated 80 °C) under repeated shots.
+* *Terminations*: crimped lugs only, no solder (solder joints fatigue under repeated pulse heating). Bond braid circumferentially to the return path at both ends; do not pigtail the braid to a single point.
+* *Replacement schedule*: every 10,000–20,000 shots, or sooner if inspection signals trigger. Sync with capacitor service intervals where possible.
+* *Inspection protocol*:
+** Visual check of terminations every ~500 shots — discoloration, jacket damage near lugs
+** IR thermometer reading of jacket ~30 s after a shot — track trend, not absolute
+** End-to-end DC resistance with milliohmmeter every cap swap — log baseline; 50% increase = replace
+** Immediate replacement on: audible snap during discharge, visible jacket damage, resistance > 2× baseline
+
+==== Upgrade paths
+
+Listed in order of incremental improvement over RG-213. The bigger conductor cross-sections and proper pulse-rated constructions remove the inspection-heavy maintenance pattern.
+
+[cols="2,1,1,1,1", options="header"]
+|===
+| Cable | Conductor area | V rating | Cost (5 m pair) | Expected life
+
+| RG-213 (Belden 8267)        | 5.3 mm²  | 3.7 kV | ~$30   | 10–20k shots
+| RG-218/U                     | ~21 mm²  | 5 kV   | ~$150  | 30–50k shots
+| Type W 2/0 portable power    | 67 mm²   | 2 kV   | ~$200  | 100k+ shots
+| Spot welder kickless cable   | 107+ mm² | 2–5 kV | ~$500+ | 1M+ shots
+|===
+
+* *RG-218/U*: incremental upgrade — same coaxial geometry, scaled-up conductor and dielectric.
+* *Type W 2/0 portable power*: workhorse upgrade — heavily stranded portable power cable, EPDM jacket, industrial robust. Run two conductors twisted or zip-tied at ~100 mm intervals to keep the inductive loop area small. Terminate with hydraulic-crimped compression lugs.
+* *Spot welder kickless cable*: industrial-pedigree option — coaxial geometry built in, designed for millions of pulse cycles. Suppliers: Watteredge, NWL Capacitors, Mersen, Hi-Tech Industries. Water-cooled variants available for sustained high-rate operation.
+* For sustained operation > 10 shots/min or runs > 2 m, Type W or kickless cable is recommended over scaling RG-213.
